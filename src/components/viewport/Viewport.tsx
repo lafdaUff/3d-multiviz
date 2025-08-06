@@ -12,18 +12,24 @@ export default function Viewport({ onObjectSelect }: { onObjectSelect: (data: Mo
 
 
     const [isInfoScreenVisible, setInfoScreenVisible] = useState(false);
+    const [isCameraLocked, setCameraLocked] = useState(false);
 
     function ToggleInfoScreen() {
         setInfoScreenVisible(!isInfoScreenVisible);
     }
 
+    function toggleLock() {
+        setCameraLocked(!isCameraLocked);
+        console.log('Camera lock toggled:', !isCameraLocked);
+    }
+
 return (
     <div className="viewport" id="viewport">
         <Canvas>
-            <Experience onObjectSelect={onObjectSelect} currentObjects={currentObjects} />
+            <Experience onObjectSelect={onObjectSelect} currentObjects={currentObjects} cameraLock={isCameraLocked} />
         </Canvas>
         <div className='viewportContent flex'>
-            <TopBar toggleInfoScreen={ToggleInfoScreen} />
+            <TopBar toggleInfoScreen={ToggleInfoScreen} toggleLock={toggleLock} isCameraLocked={isCameraLocked} />
             <BottomBar />
             {isInfoScreenVisible && <InfoScreen toggleInfoScreen={ToggleInfoScreen} />}
         </div>

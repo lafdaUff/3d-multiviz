@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, PresentationControls } from '@react-three/drei';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { EffectComposer, Outline } from '@react-three/postprocessing';
 import { useThree } from '@react-three/fiber';
@@ -19,6 +19,7 @@ export interface ModelData {
 interface ExperienceProps {
   onObjectSelect: (data: ModelData | null) => void;
   currentObjects?: ModelData[];
+  cameraLock?: boolean;
 }
 
 function useRadialGradientBackground(color1: string, color2: string) {
@@ -40,7 +41,7 @@ function useRadialGradientBackground(color1: string, color2: string) {
   return texture;
 }
 
-export function Experience({ onObjectSelect, currentObjects = [] }: ExperienceProps) {
+export function Experience({ onObjectSelect, currentObjects = [], cameraLock = false}: ExperienceProps) {
   const { camera } = useThree();
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const [hoveredObject, setHoveredObject] = useState<THREE.Object3D | null>(null);
@@ -51,6 +52,7 @@ export function Experience({ onObjectSelect, currentObjects = [] }: ExperiencePr
   // Função para focar na câmera
   const focusOnObject = (modelData: ModelData, position: THREE.Vector3) => {
     if (!controlsRef.current) return;
+    if (cameraLock) return;
 
     
     gsap.killTweensOf([controlsRef.current.target, camera.position]);
@@ -95,7 +97,7 @@ export function Experience({ onObjectSelect, currentObjects = [] }: ExperiencePr
     
     if (controlsRef.current) {
       gsap.killTweensOf([controlsRef.current.target, camera.position]);
-      controlsRef.current.enabled = true;
+      // controlsRef.current.enabled = true;
     }
   };
 
@@ -112,6 +114,15 @@ export function Experience({ onObjectSelect, currentObjects = [] }: ExperiencePr
     clearSelection();
   };
 
+  
+
+  if (cameraLock) {
+    if (controlsRef.current) {
+      camera.position.set(((currentObjects.length - 1) * 1.5) / 2, 0.5, 0.75 * currentObjects.length);
+      camera.lookAt(((currentObjects.length - 1) * 1.5) / 2, 0, 0);
+    }
+  }
+
   return (
     <>
       <primitive object={bgColor} attach="background" />
@@ -121,7 +132,7 @@ export function Experience({ onObjectSelect, currentObjects = [] }: ExperiencePr
       <directionalLight position={[5, 10, 7.5]} intensity={2} />
 
       {/* Controles */}
-      <OrbitControls ref={controlsRef} enableDamping dampingFactor={0.25} makeDefault />
+      <OrbitControls ref={controlsRef} enableDamping enabled={!cameraLock} dampingFactor={0.25} makeDefault />
 
       {/* Background para capturar cliques */}
       <mesh onClick={handleBackgroundClick} visible={false}>
@@ -131,13 +142,23 @@ export function Experience({ onObjectSelect, currentObjects = [] }: ExperiencePr
 
       {/* Renderiza todos os modelos do arquivo de dados */}
       {currentObjects.map((modelInfo, index) => (
-        <Model
-          key={modelInfo.link}
-          modelLink={modelInfo.link}
-          position={[index * 1.5, 0, 0]} // Espaçamento entre modelos
-          onHover={setHoveredObject}
-          onClick={handleModelClick}
-        />
+        <group key={modelInfo.link} position={[index * 1.5, 0, 0]}>
+          <PresentationControls 
+            cursor={false}
+            enabled={cameraLock}
+            polar={[-Infinity, Infinity]}
+            snap={true}
+            speed={1.5}
+            global={true}
+          >
+            <Model
+              modelLink={modelInfo.link}
+              position={[0, 0, 0]} // Reset to origin since group handles positioning
+              onHover={setHoveredObject}
+              onClick={handleModelClick}
+            />
+          </PresentationControls>
+        </group>
       ))}
       
       {/* Efeitos de Pós-processamento */}
