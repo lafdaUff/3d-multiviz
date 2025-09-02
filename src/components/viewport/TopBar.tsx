@@ -1,3 +1,5 @@
+import ModeSelector from "./ModeSelector";
+
 interface TopBarProps {
   toggleInfoScreen?: () => void;
   toggleLock: () => void;
@@ -22,6 +24,7 @@ export default function TopBar({toggleInfoScreen, toggleLock, isCameraLocked} : 
         <p id="lock-btn" className="viewportBtn" onClick={toggleLock}>
             <i className={`fa-solid fa-lock${isCameraLocked ? '-open' : ''}`}></i>
         </p>
+        <ModeSelector />
         <p id="help-mode-btn" className="viewportBtn" onClick={toggleInfoScreen}>
             <i className="fa-regular fa-circle-question"></i>
         </p>
