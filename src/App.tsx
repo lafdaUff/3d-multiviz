@@ -5,6 +5,7 @@ import { type ModelData } from './components/viewport/Experience'
 import { useState } from 'react'
 import ObjectsContext from './ObjectsContext'
 import Viewport from './components/viewport/Viewport'
+import './i18n'
 
 
 function App() {

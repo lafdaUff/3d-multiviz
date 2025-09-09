@@ -2,9 +2,12 @@ import { type ModelData } from "../viewport/Experience"
 import searchInItems from "./search"
 import database from '../../data/database.json' with { type: 'json' }
 import { useEffect } from "react"
+import { useTranslation } from "react-i18next"
 
 export default function SearchBar({ onSearch }: { onSearch: (items: ModelData[]) => void }) {
-    
+
+    const { t } = useTranslation();
+
     function handleSearch(searchTerm: string) {
         const getSearch = searchInItems(database, searchTerm)
         onSearch(getSearch)
@@ -19,7 +22,7 @@ export default function SearchBar({ onSearch }: { onSearch: (items: ModelData[])
             <input
                 type="text"
                 id="searchField"
-                placeholder="Pesquisar"
+                placeholder={t("search.placeholder")}
                 className="search"
                 onChange={(e) => handleSearch(e.target.value)}
             />

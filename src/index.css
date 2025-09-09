@@ -166,9 +166,15 @@ small{
 }
 
 .viewportTop{
-  justify-content: end;
+  justify-content: space-between;
   gap: 10px;
   align-content: center;
+}
+
+.viewportInteraction{
+  gap: 10px;
+  align-content: center;
+  align-items: flex-start;
 }
 .viewportBottom div{
   width: 80%;
@@ -370,7 +376,7 @@ ul::-webkit-scrollbar {
   padding: 10px 10px;
   text-decoration: none;
   list-style: none;
-  /* background-color: #121212; */
+  background-color: var(--renderer-color-1);
   background-size: cover;
   background-position: center;
   border-radius: 15px;
@@ -405,6 +411,13 @@ ul::-webkit-scrollbar {
 .tooltip.visible {
   visibility: visible;
   opacity: 1;
+}
+
+.tooltip img{
+  width: 100%;
+  max-width: 200px;
+  border-radius: 10px;
+  margin-top: 5px;
 }
 
 .objetos .selected{

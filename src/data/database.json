@@ -57,5 +57,20 @@
       "link": "glitch",
       "thumb": "02",
       "descricao": "Sim, tem 700mil polígonos"
+    },
+    {
+      "nome": "Aborigene",
+      "link": "aborigene",
+      "thumb": "aborigene"
+    },
+    {
+      "nome": "Hipopótamo",
+      "link": "hipopotamo",
+      "thumb": "hipopotamo"
+    },
+    {
+      "nome": "Pinóquio",
+      "link": "pinoquio",
+      "thumb": "02"
     }
   ]
