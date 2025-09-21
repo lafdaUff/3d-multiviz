@@ -28,7 +28,7 @@ i18n
       en: {
         translation: {
           "collection": {
-            "name": "Collection of UFF Design Masks",
+            "name": "Lafda internal collection",
             "desc": "© Universidade Federal Fluminense - 2025"
           },
           "tutorial": {
@@ -47,7 +47,7 @@ i18n
       pt: {
         translation: {
           "collection": {
-            "name": "Coleção de Máscaras de Design da UFF",
+            "name": "Acervo interno do Lafda",
             "desc": "© Universidade Federal Fluminense - 2025"
           },
           "tutorial": {

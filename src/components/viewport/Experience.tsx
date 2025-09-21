@@ -1,9 +1,9 @@
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef} from 'react';
 import * as THREE from 'three';
 import { OrbitControls, PresentationControls } from '@react-three/drei';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { EffectComposer, Outline } from '@react-three/postprocessing';
-import { useThree } from '@react-three/fiber';
+import { useThree, useFrame } from '@react-three/fiber';
 import gsap from 'gsap';
 import Model from './Model';
 import data from '../../data/database.json' with { type: 'json' }; 
@@ -20,6 +20,8 @@ interface ExperienceProps {
   onObjectSelect: (data: ModelData | null) => void;
   currentObjects?: ModelData[];
   cameraLock?: boolean;
+  syncedCameraRef?: React.RefObject<OrbitControlsImpl | null> | null;
+  isMaster?: boolean;
 }
 
 function useRadialGradientBackground(color1: string, color2: string) {
@@ -41,13 +43,38 @@ function useRadialGradientBackground(color1: string, color2: string) {
   return texture;
 }
 
-export function Experience({ onObjectSelect, currentObjects = [], cameraLock = false}: ExperienceProps) {
+export function Experience({ 
+  onObjectSelect, 
+  currentObjects = [], 
+  cameraLock = false, 
+  syncedCameraRef,
+  isMaster = false 
+}: ExperienceProps) {
   const { camera } = useThree();
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const [hoveredObject, setHoveredObject] = useState<THREE.Object3D | null>(null);
 
   // Cores para o fundo
   const bgColor = useRadialGradientBackground('#2b2b2b', '#1c1c1c');
+
+  if (syncedCameraRef && controlsRef.current) {
+      if (isMaster) {
+        
+        syncedCameraRef.current = controlsRef.current;
+      }
+    }
+
+  useFrame(() => {
+    if (syncedCameraRef?.current && !isMaster && controlsRef.current) {
+      const masterControls = syncedCameraRef.current;
+      
+      
+      camera.position.copy(masterControls.object.position);
+      camera.quaternion.copy(masterControls.object.quaternion);
+      controlsRef.current.target.copy(masterControls.target);
+      controlsRef.current.update();
+    }
+  });
 
   // Função para focar na câmera
   const focusOnObject = (modelData: ModelData, position: THREE.Vector3) => {
@@ -131,8 +158,14 @@ export function Experience({ onObjectSelect, currentObjects = [], cameraLock = f
       <ambientLight intensity={5} />
       <directionalLight position={[5, 10, 7.5]} intensity={2} />
 
-      {/* Controles */}
-      <OrbitControls ref={controlsRef} enableDamping enabled={!cameraLock} dampingFactor={0.25} makeDefault />
+      {/* Controles*/}
+      <OrbitControls 
+        ref={controlsRef} 
+        enableDamping 
+        enabled={!cameraLock && (isMaster || !syncedCameraRef)} 
+        dampingFactor={0.25} 
+        makeDefault 
+      />
 
       {/* Background para capturar cliques */}
       <mesh onClick={handleBackgroundClick} visible={false}>

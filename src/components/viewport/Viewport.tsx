@@ -3,7 +3,7 @@ import TopBar from './TopBar'
 import BottomBar from './BottomBar'
 import InfoScreen from './InfoScreen'
 import { Experience, type ModelData } from './Experience'
-import { useContext, useState } from 'react'
+import { useContext, useState, useRef } from 'react'
 import ObjectsContext from '../../ObjectsContext'
 import ModeContext from '../../ModeContext'
 
@@ -13,6 +13,10 @@ export default function Viewport({ onObjectSelect }: { onObjectSelect: (data: Mo
 
     const [isInfoScreenVisible, setInfoScreenVisible] = useState(false);
     const [isCameraLocked, setCameraLocked] = useState(false);
+    const [masterCamera, setMasterCamera] = useState<number | null>(null);
+
+    // Add ref for camera controls synchronization
+    const cameraControlsRef = useRef(null);
 
     function ToggleInfoScreen() {
         setInfoScreenVisible(!isInfoScreenVisible);
@@ -31,8 +35,14 @@ return (
             {selectedMode === 'mode3' ? 
                 currentObjects.map(
                 (object, index) => (
-                    <Canvas key={object.link} className={`clip-${index % 2 === 0 ? 'left' : 'right'} canvas-container`} style={{height: '100%', width: '100%', position: 'absolute'}}>
-                        <Experience onObjectSelect={onObjectSelect} currentObjects={[object]} cameraLock={isCameraLocked} />
+                    <Canvas key={object.link} onMouseEnter={() => setMasterCamera(index)} className={`clip-${index % 2 === 0 ? 'left' : 'right'} canvas-container`} style={{height: '100%', width: '100%', position: 'absolute'}}>
+                        <Experience
+                            onObjectSelect={onObjectSelect} 
+                            currentObjects={[object]}
+                            cameraLock={isCameraLocked} 
+                            syncedCameraRef={cameraControlsRef}
+                            isMaster={index === masterCamera}
+                        />
                     </Canvas>
                 )) :
                 <Canvas className='canvas-container' style={{height: '100%', width: '100%'}}>

@@ -326,7 +326,7 @@ button:hover{
   position: relative;
   width: 100%;
   height: 100%;
-  overflow-y: clip;
+  overflow-y: hidden;
 }
 ul{
   list-style: none;
@@ -340,7 +340,7 @@ ul{
   height: 100%;
   flex: 1;
   overflow-y: auto;
-  
+  padding-bottom: 50px;
 }
 ul {
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
@@ -372,7 +372,7 @@ ul::-webkit-scrollbar {
 .selectable-item{
   border: solid 1px transparent;
   position: relative;
-  min-width: 30%;
+  min-width: 45%;
   padding: 10px 10px;
   text-decoration: none;
   list-style: none;
@@ -488,6 +488,7 @@ ul::-webkit-scrollbar {
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
+    padding-bottom: 0;
   }
   .metadata-div > ul{
     flex-direction: column;

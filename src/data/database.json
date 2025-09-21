@@ -1,64 +1,5 @@
 [
     {
-      "nome": "Vida e Morte",
-      "link": "vidaemorte",
-      "thumb": "vidamorte",
-      "descricao": "Uma escultura que representa a dualidade da vida e da morte, com formas entrelaçadas que simbolizam a conexão entre os dois estados.",
-      "customdata": [
-        {"Data de criação" : "21/04/2025" },
-        {"polígonos": 12344},
-        {"Materiais": ["Argila", "Metal"]},
-        {"Instituição Fornecedora": {
-          "nome": "Universidade Federal Fluminense",
-          "link": "https://www.uff.br"
-        }}
-      ]
-    },
-    {
-      "nome": "Bell'art",
-      "link": "mascarateste",
-      "thumb": "bellart",
-      "descricao": "Bell'art é uma escultura que representa a beleza e a harmonia da arte. Com formas fluidas e cores vibrantes, ela captura a essência da criatividade humana.",
-      "customdata": [
-        {"Data de criação" : "21/04/2025" },
-        {"polígonos": 15344},
-        {"Materiais": ["Argila", "Papel"]},
-        {"Instituição Fornecedora": {
-          "nome": "Universidade Federal Fluminense",
-          "link": "https://www.uff.br"
-        }},
-        {"País": "Brasil"},
-        {"Tamanho": "Grande"},
-        {"Cor": "Vermelho"}
-      ]
-    },
-    {
-      "nome": "Caveira",
-      "link": "caveira",
-      "thumb": "caveira"
-    },
-    {
-      "nome": "Folha",
-      "link": "folha",
-      "thumb": "folha"
-    },
-    {
-      "nome": "Lasanha",
-      "link": "lasagna",
-      "thumb": "01"
-    },
-    {
-      "nome": "Suzanne",
-      "link": "suzzane",
-      "thumb": "02"
-    },
-    {
-      "nome": "glitch",
-      "link": "glitch",
-      "thumb": "02",
-      "descricao": "Sim, tem 700mil polígonos"
-    },
-    {
       "nome": "Aborigene",
       "link": "aborigene",
       "thumb": "aborigene"
@@ -71,6 +12,41 @@
     {
       "nome": "Pinóquio",
       "link": "pinoquio",
-      "thumb": "02"
+      "thumb": "pinoquio"
+    },
+    {
+      "nome": "Tartaruga Marajoara",
+      "link": "tartaruga_marajoara",
+      "thumb": "tartaruga"
+    },
+    {
+      "nome": "Vaso Marajoara",
+      "link": "vaso_marajoara",
+      "thumb": "vaso"
+    },
+    {
+      "nome": "Boneca de Pano",
+      "link": "boneca_de_pano",
+      "thumb": "boneca"
+    },
+    {
+      "nome": "Escultura Feminina",
+      "link": "escultura_feminina_terracota",
+      "thumb": "escultura"
+    },
+    {
+      "nome": "Máscara Preta e Dourada",
+      "link": "mascara_preta_dourada",
+      "thumb": "mascara"
+    },
+    {
+      "nome": "Souvenir de Lhama",
+      "link": "souvenir_lhama",
+      "thumb": "lhama"
+    },
+    {
+      "nome": "Triciclo Anos 80",
+      "link": "triciclo_anos_80",
+      "thumb": "triciclo"
     }
   ]
