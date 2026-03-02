@@ -14,6 +14,11 @@ export interface ModelData {
   thumb: string;
   descricao?: string;
   customdata?: Array<Record<string, unknown>>;
+  dimensions?: {
+    altura: string;
+    largura?: string;
+    profundidade?: string;
+  };
 }
 
 interface ExperienceProps {
@@ -59,6 +64,32 @@ export function Experience({
   // Cores para o fundo
   const bgColor = useRadialGradientBackground('#2b2b2b', '#1c1c1c');
 
+  // Compute proportional X positions based on each object's scaled size
+  const objectPositions = useMemo(() => {
+    const sizes = currentObjects.map(obj => {
+      if (obj.dimensions?.altura) {
+        const h = parseFloat(obj.dimensions.altura) / 100;
+        if (!isNaN(h) && h > 0) return h;
+      }
+      return 1; // default for objects without dimensions
+    });
+
+    const positions: number[] = [];
+    let currentX = 0;
+
+    for (let i = 0; i < sizes.length; i++) {
+      if (i === 0) {
+        positions.push(0);
+      } else {
+        const gap = (sizes[i - 1] + sizes[i]) * 0.4;
+        currentX += sizes[i - 1] / 2 + gap + sizes[i] / 2;
+        positions.push(currentX);
+      }
+    }
+
+    return positions;
+  }, [currentObjects]);
+
   if (syncedCameraRef && controlsRef.current) {
       if (isMaster) {
         
@@ -100,7 +131,13 @@ export function Experience({
       onUpdate: () => controlsRef.current?.update(),
     });
     
-    const distance = 1.5; // Ajuste a distância do foco
+    let distance = 1.5;
+    if (modelData.dimensions?.altura) {
+      const heightM = parseFloat(modelData.dimensions.altura) / 100;
+      if (!isNaN(heightM) && heightM > 0) {
+        distance = heightM + 0.08;
+      }
+    }
     gsap.to(camera.position, {
       duration: 0.8,
       ease: 'power2.inOut',
@@ -148,8 +185,22 @@ export function Experience({
 
   if (cameraLock) {
     if (controlsRef.current) {
-      camera.position.set(((currentObjects.length - 1) * 1.5) / 2, 0.5, cameraDistance * currentObjects.length);
-      camera.lookAt(((currentObjects.length - 1) * 1.5) / 2, 0, 0);
+      const maxHeight = currentObjects.reduce((max, obj) => {
+        if (obj.dimensions?.altura) {
+          const h = parseFloat(obj.dimensions.altura) / 100;
+          if (!isNaN(h) && h > max) return h;
+        }
+        return max;
+      }, 0);
+      const baseZ = maxHeight > 0
+        ? maxHeight * 2.5 * currentObjects.length
+        : cameraDistance * currentObjects.length;
+      const yOffset = maxHeight > 0 ? maxHeight * 1.5 : 0.5;
+      const centerX = objectPositions.length > 0
+        ? (objectPositions[0] + objectPositions[objectPositions.length - 1]) / 2
+        : 0;
+      camera.position.set(centerX, yOffset, baseZ);
+      camera.lookAt(centerX, 0, 0);
     }
   }
 
@@ -184,7 +235,7 @@ export function Experience({
 
       {/* Renderiza todos os modelos do arquivo de dados */}
       {currentObjects.map((modelInfo, index) => (
-        <group key={modelInfo.link} position={[index * 1.5, 0, 0]} >
+        <group key={modelInfo.link} position={[objectPositions[index] ?? 0, 0, 0]} >
           {cameraLock ? (
             <PresentationControls 
               cursor={false}
@@ -199,6 +250,7 @@ export function Experience({
                 positionMode='center'
                 onHover={setHoveredObject}
                 onClick={handleModelClick}
+                dimensions={modelInfo.dimensions}
               />
             </PresentationControls>
           ) : syncedCameraRef ? (
@@ -207,6 +259,7 @@ export function Experience({
               positionMode='base'
               onHover={setHoveredObject}
               onClick={handleModelClick}
+              dimensions={modelInfo.dimensions}
             />
           ) : 
           (
@@ -221,6 +274,7 @@ export function Experience({
                 positionMode='base'
                 onHover={setHoveredObject}
                 onClick={handleModelClick}
+                dimensions={modelInfo.dimensions}
               />
             </DragControls>
           )

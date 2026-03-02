@@ -35,7 +35,7 @@ return (
             {selectedMode === 'mode3' ? 
                 currentObjects.map(
                 (object, index) => (
-                    <Canvas key={object.link} onMouseEnter={() => setMasterCamera(index)} onTouchStart={() => setMasterCamera(index)} className={`clip-${index % 2 === 0 ? 'left' : 'right'} canvas-container`} style={{height: '100%', width: '100%', position: 'absolute'}}>
+                    <Canvas key={object.link} camera={{ near: 0.01 }} onMouseEnter={() => setMasterCamera(index)} onTouchStart={() => setMasterCamera(index)} className={`clip-${index % 2 === 0 ? 'left' : 'right'} canvas-container`} style={{height: '100%', width: '100%', position: 'absolute'}}>
                         <Experience
                             onObjectSelect={onObjectSelect} 
                             currentObjects={[object]}
@@ -45,7 +45,7 @@ return (
                         />
                     </Canvas>
                 )) :
-                <Canvas className='canvas-container' style={{height: '100%', width: '100%'}}>
+                <Canvas camera={{ near: 0.01 }} className='canvas-container' style={{height: '100%', width: '100%'}}>
                     <Experience onObjectSelect={onObjectSelect} currentObjects={currentObjects} cameraLock={selectedMode === 'mode2'} />
                 </Canvas>
             }

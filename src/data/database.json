@@ -1,65 +1,239 @@
 [
-    {
-      "nome": "Aborigene",
-      "link": "aborigene",
-      "thumb": "aborigene"
+  {
+    "nome": "Aborigene",
+    "link": "aborigene",
+    "thumb": "aborigene",
+    "dimensions": {
+      "altura": "8.3"
     },
-    {
-      "nome": "Hipopótamo",
-      "link": "hipopotamo",
-      "thumb": "hipopotamo",
-      "descricao": "Bell'art é uma escultura que representa a beleza e a harmonia da arte. Com formas fluidas e cores vibrantes, ela captura a essência da criatividade humana.",
-      "customdata": [
-        {"Data de criação" : "21/04/2025" },
-        {"polígonos": 15344},
-        {"Materiais": ["Argila", "Papel"]},
-        {"Instituição Fornecedora": {
-          "nome": "Universidade Federal Fluminense",
-          "link": "https://www.uff.br"
-        }},
-        {"País": "Brasil"},
-        {"Tamanho": "Grande"},
-        {"Cor": "Vermelho"}
-      ]
+    "customdata": [
+      {
+        "Data de aquisição": "2002"
+      },
+      {
+        "País": "Austrália"
+      },
+      {
+        "Cidade": "Gold Coast"
+      },
+      {
+        "Materiais": [
+          "Resina pintada"
+        ]
+      },
+      {
+        "Modelo 3D": {
+          "nome": "Link",
+          "link": "https://sketchfab.com/3d-models/aborigene-souvenir-f0fedeaf0f96438fb601f9a9730f37be"
+        }
+      }
+    ]
+  },
+  {
+    "nome": "Hipopótamo",
+    "link": "hipopotamo",
+    "thumb": "hipopotamo",
+    "dimensions": {
+      "altura": "8.7"
     },
-    {
-      "nome": "Pinóquio",
-      "link": "pinoquio",
-      "thumb": "pinoquio"
+    "customdata": [
+      {
+        "Data de aquisição": "1989"
+      },
+      {
+        "País": "África (país desconhecido)"
+      },
+      {
+        "Cidade": "Cidade desconhecida"
+      },
+      {
+        "Materiais": [
+          "Ébano"
+        ]
+      },
+      {
+        "Modelo 3D": {
+          "nome": "Link",
+          "link": "https://poly.cam/capture/d92b9357-feb7-45f1-ab6a-38c7e57d0cfd"
+        }
+      }
+    ]
+  },
+  {
+    "nome": "Pinóquio",
+    "link": "pinoquio",
+    "thumb": "pinoquio",
+    "dimensions": {
+      "altura": "23.5"
     },
-    {
-      "nome": "Tartaruga Marajoara",
-      "link": "tartaruga_marajoara",
-      "thumb": "tartaruga"
+    "customdata": [
+      {
+        "Data de aquisição": "2007"
+      },
+      {
+        "País": "Itália"
+      },
+      {
+        "Cidade": "Torino"
+      },
+      {
+        "Materiais": [
+          "Madeira pintada"
+        ]
+      },
+      {
+        "Modelo 3D": {
+          "nome": "Link",
+          "link": "https://poly.cam/capture/44d37f33-fa37-4704-ae48-d53aac14733e"
+        }
+      }
+    ]
+  },
+  {
+    "nome": "Tartaruga Marajoara",
+    "link": "tartaruga_marajoara",
+    "thumb": "tartaruga",
+    "dimensions": {
+      "altura": "4.4"
     },
-    {
-      "nome": "Vaso Marajoara",
-      "link": "vaso_marajoara",
-      "thumb": "vaso"
+    "customdata": [
+      {
+        "Data de aquisição": "2013"
+      },
+      {
+        "País": "Brasil"
+      },
+      {
+        "Cidade": "Soure"
+      },
+      {
+        "Materiais": [
+          "Cerâmica pintada"
+        ]
+      },
+      {
+        "Modelo 3D": {
+          "nome": "Link",
+          "link": "https://sketchfab.com/3d-models/tartaruga-marajoara-db7be08972a04dcdb4891b0ff361319b"
+        }
+      }
+    ]
+  },
+  {
+    "nome": "Vaso Marajoara",
+    "link": "vaso_marajoara",
+    "thumb": "vaso",
+    "dimensions": {
+      "altura": "7"
     },
-    {
-      "nome": "Boneca de Pano",
-      "link": "boneca_de_pano",
-      "thumb": "boneca"
+    "customdata": [
+      {
+        "Data de aquisição": "2021"
+      },
+      {
+        "País": "Brasil"
+      },
+      {
+        "Cidade": "Belém"
+      },
+      {
+        "Materiais": [
+          "Cerâmica pintada"
+        ]
+      },
+      {
+        "Modelo 3D": {
+          "nome": "Link",
+          "link": "https://sketchfab.com/3d-models/vaso-marajoara-pequeno-5a89dfbe11be4253bc076d4e3ae644db"
+        }
+      }
+    ]
+  },
+  {
+    "nome": "Boneca de Pano",
+    "link": "boneca_de_pano",
+    "thumb": "boneca",
+    "dimensions": {
+      "altura": "23"
     },
-    {
-      "nome": "Escultura Feminina",
-      "link": "escultura_feminina_terracota",
-      "thumb": "escultura"
+    "customdata": [
+      {
+        "Data de aquisição": "2015"
+      },
+      {
+        "País": "Brasil"
+      },
+      {
+        "Cidade": "Rio de Janeiro"
+      },
+      {
+        "Materiais": [
+          "Tecido e enchimento de algodão"
+        ]
+      },
+      {
+        "Modelo 3D": {
+          "nome": "Link",
+          "link": "https://sketchfab.com/3d-models/boneca-de-pano-6e44c0e705314de1a417d783f12c25d1"
+        }
+      }
+    ]
+  },
+  {
+    "nome": "Escultura Feminina",
+    "link": "escultura_feminina_terracota",
+    "thumb": "escultura",
+    "dimensions": {
+      "altura": "8"
     },
-    {
-      "nome": "Máscara Preta e Dourada",
-      "link": "mascara_preta_dourada",
-      "thumb": "mascara"
+    "customdata": []
+  },
+  {
+    "nome": "Máscara Preta e Dourada",
+    "link": "mascara_preta_dourada",
+    "thumb": "mascara",
+    "dimensions": {
+      "altura": "10"
     },
-    {
-      "nome": "Souvenir de Lhama",
-      "link": "souvenir_lhama",
-      "thumb": "lhama"
+    "customdata": []
+  },
+  {
+    "nome": "Souvenir de Lhama",
+    "link": "souvenir_lhama",
+    "thumb": "lhama",
+    "dimensions": {
+      "altura": "23.5"
     },
-    {
-      "nome": "Triciclo Anos 80",
-      "link": "triciclo_anos_80",
-      "thumb": "triciclo"
-    }
-  ]
+    "customdata": []
+  },
+  {
+    "nome": "Triciclo Anos 80",
+    "link": "triciclo_anos_80",
+    "thumb": "triciclo",
+    "dimensions": {
+      "altura": "16"
+    },
+    "customdata": [
+      {
+        "Data de aquisição": "1983"
+      },
+      {
+        "País": "Itália"
+      },
+      {
+        "Cidade": "Pisa"
+      },
+      {
+        "Materiais": [
+          "Metal pintado, plástico e borracha"
+        ]
+      },
+      {
+        "Modelo 3D": {
+          "nome": "Link",
+          "link": "https://sketchfab.com/3d-models/triciclo-anos-80-2fe830c8d4124228b8b78bfdd1ffe62e"
+        }
+      }
+    ]
+  }
+]
