@@ -2,10 +2,14 @@ import './App.css'
 import Sidebar from './components/Sidebar/Sidebar'
 import { type ModelData } from './components/viewport/Experience'
 
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import ObjectsContext from './ObjectsContext'
 import Viewport from './components/viewport/Viewport'
 import './i18n'
+
+const DataManager = import.meta.env.DEV
+  ? lazy(() => import('./dev/DataManager'))
+  : null;
 
 
 function App() {
@@ -28,6 +32,11 @@ function App() {
         <Sidebar objectData={selectedMetadata} cleanMetadata={cleanMetadata} />
         <Viewport onObjectSelect={handleObjectSelect}/>
       </ObjectsContext.Provider>
+      {DataManager && (
+        <Suspense fallback={null}>
+          <DataManager />
+        </Suspense>
+      )}
     </div>
   )
 }
