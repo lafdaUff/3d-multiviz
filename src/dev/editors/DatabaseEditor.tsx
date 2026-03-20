@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useDataFile } from '../useDataManager';
-import { generateThumbnail } from '../generateThumbnail';
+import { generateThumbnail, extractDimensions } from '../generateThumbnail';
 import type { ModelData, CustomData } from '../../data/schema';
 
 interface SchemaField {
@@ -232,6 +232,8 @@ interface ModalState {
   form: ModelData;
   customData: CustomData[];
   uploading: boolean;
+  proportionalLock: boolean;
+  extracting: boolean;
 }
 
 function ModelModal({ state, schema, onSave, onCancel, onChange }: {
@@ -241,7 +243,7 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
   onCancel: () => void;
   onChange: (s: ModalState) => void;
 }) {
-  const { form, customData, uploading, mode } = state;
+  const { form, customData, uploading, mode, proportionalLock, extracting } = state;
 
   const setForm = (patch: Partial<ModelData>) =>
     onChange({ ...state, form: { ...form, ...patch } });
@@ -251,10 +253,12 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
     try {
       const slug = await uploadModel(file);
       const thumbSlug = form.thumb || slug;
+      let autoDimensions: { altura: string; largura: string; profundidade: string } | undefined;
 
       try {
-        const thumbBlob = await generateThumbnail(file);
-        await uploadThumbBlob(thumbBlob, thumbSlug);
+        const result = await generateThumbnail(file);
+        await uploadThumbBlob(result.blob, thumbSlug);
+        autoDimensions = result.dimensions;
       } catch (e) {
         console.warn('Auto-thumbnail generation failed:', e);
       }
@@ -267,6 +271,7 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
           link: slug,
           thumb: thumbSlug,
           nome: form.nome || file.name.replace(/\.glb$/i, ''),
+          dimensions: autoDimensions || form.dimensions,
         },
       });
     } catch {
@@ -281,6 +286,47 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
       await uploadThumbFile(file, thumbName);
       onChange({ ...state, form: { ...form, thumb: thumbName } });
     } catch { /* ignore */ }
+  };
+
+  const handleDimensionChange = (field: 'altura' | 'largura' | 'profundidade', value: string) => {
+    const prev: Record<string, string> = {
+      altura: form.dimensions?.altura || '',
+      largura: form.dimensions?.largura || '',
+      profundidade: form.dimensions?.profundidade || '',
+    };
+
+    const oldNum = parseFloat(prev[field]);
+    const newNum = parseFloat(value);
+    const next = { ...prev, [field]: value };
+
+    if (proportionalLock && oldNum > 0 && newNum > 0 && oldNum !== newNum) {
+      const ratio = newNum / oldNum;
+      for (const key of ['altura', 'largura', 'profundidade']) {
+        if (key !== field) {
+          const v = parseFloat(prev[key]);
+          if (v > 0) next[key] = String(Math.round(v * ratio * 100) / 100);
+        }
+      }
+    }
+
+    setForm({
+      dimensions: {
+        altura: next.altura,
+        largura: next.largura || undefined,
+        profundidade: next.profundidade || undefined,
+      },
+    });
+  };
+
+  const handleExtractDimensions = async () => {
+    if (!form.link) return;
+    onChange({ ...state, extracting: true });
+    try {
+      const dims = await extractDimensions(form.link);
+      onChange({ ...state, extracting: false, form: { ...form, dimensions: dims } });
+    } catch {
+      onChange({ ...state, extracting: false });
+    }
   };
 
   const addCustomField = (fieldName: string) => {
@@ -365,6 +411,69 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
                 placeholder="Descrição do modelo"
               />
             </div>
+
+            <div className="dm-field">
+              <div className="dm-dimensions-header">
+                <label className="dm-field-label">Dimensões <span className="dm-field-label-hint">cm</span></label>
+                <div className="dm-dimensions-actions">
+                  <button
+                    type="button"
+                    className="dm-lock-btn"
+                    onClick={handleExtractDimensions}
+                    disabled={!form.link || extracting}
+                    title="Extrair dimensões do modelo"
+                  >
+                    <i className={`fa-solid ${extracting ? 'fa-spinner fa-spin' : 'fa-cube'}`} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`dm-lock-btn${proportionalLock ? ' active' : ''}`}
+                    onClick={() => onChange({ ...state, proportionalLock: !proportionalLock })}
+                    title={proportionalLock ? 'Proporção travada' : 'Proporção destravada'}
+                  >
+                    <i className={`fa-solid ${proportionalLock ? 'fa-link' : 'fa-link-slash'}`} />
+                  </button>
+                </div>
+              </div>
+              <div className="dm-model-row-3">
+                <div className="dm-field">
+                  <label className="dm-field-label-sm">Altura</label>
+                  <input
+                    className="dm-field-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.dimensions?.altura || ''}
+                    onChange={e => handleDimensionChange('altura', e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="dm-field">
+                  <label className="dm-field-label-sm">Largura</label>
+                  <input
+                    className="dm-field-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.dimensions?.largura || ''}
+                    onChange={e => handleDimensionChange('largura', e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="dm-field">
+                  <label className="dm-field-label-sm">Profundidade</label>
+                  <input
+                    className="dm-field-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.dimensions?.profundidade || ''}
+                    onChange={e => handleDimensionChange('profundidade', e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           {(schema && schema.length > 0) && (
@@ -433,6 +542,8 @@ export default function DatabaseEditor() {
     form: { nome: '', link: '', thumb: '' },
     customData: [],
     uploading: false,
+    proportionalLock: true,
+    extracting: false,
   });
 
   const openEdit = (index: number) => {
@@ -443,15 +554,26 @@ export default function DatabaseEditor() {
       form: { ...item },
       customData: item.customdata ? item.customdata.map(d => ({ ...d })) : [],
       uploading: false,
+      proportionalLock: true,
+      extracting: false,
     });
   };
 
   const handleSave = () => {
     if (!modal) return;
+    const dims = modal.form.dimensions;
+    const cleanDims = dims?.altura
+      ? {
+          altura: dims.altura,
+          ...(dims.largura ? { largura: dims.largura } : {}),
+          ...(dims.profundidade ? { profundidade: dims.profundidade } : {}),
+        }
+      : undefined;
     const item: ModelData = {
       ...modal.form,
       thumb: modal.form.thumb || modal.form.link,
       customdata: modal.customData.length > 0 ? modal.customData : undefined,
+      dimensions: cleanDims,
     };
     if (modal.mode === 'add') {
       save([...data, item]);

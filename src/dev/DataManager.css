@@ -902,6 +902,57 @@
   min-width: 0;
 }
 
+.dm-model-row-3 {
+  display: flex;
+  gap: 10px;
+}
+.dm-model-row-3 > .dm-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.dm-field-label-sm {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 2px;
+}
+
+.dm-dimensions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.dm-dimensions-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.dm-lock-btn {
+  background: transparent;
+  border: 1px solid #555 !important;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: border-color 0.15s, background 0.15s;
+  padding: 0;
+  line-height: 1;
+}
+.dm-lock-btn:hover {
+  border-color: #fff !important;
+}
+.dm-lock-btn.active {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.4) !important;
+}
+
 .dm-model-dropzone {
   flex: 1;
   min-height: 180px;

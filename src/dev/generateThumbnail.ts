@@ -3,7 +3,13 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const THUMB_SIZE = 512;
 
-export async function generateThumbnail(glbFile: File): Promise<Blob> {
+export interface ModelDimensions {
+  altura: string;
+  largura: string;
+  profundidade: string;
+}
+
+export async function generateThumbnail(glbFile: File): Promise<{ blob: Blob; dimensions: ModelDimensions }> {
   const arrayBuffer = await glbFile.arrayBuffer();
 
   const loader = new GLTFLoader();
@@ -64,5 +70,40 @@ export async function generateThumbnail(glbFile: File): Promise<Blob> {
     }
   });
 
-  return blob;
+  // Convert bounding box from model units (meters) to centimeters
+  const dimensions: ModelDimensions = {
+    altura: String(Math.round(size.y * 100 * 100) / 100),
+    largura: String(Math.round(size.x * 100 * 100) / 100),
+    profundidade: String(Math.round(size.z * 100 * 100) / 100),
+  };
+
+  return { blob, dimensions };
+}
+
+export async function extractDimensions(modelSlug: string): Promise<ModelDimensions> {
+  const res = await fetch(`/modelos/${modelSlug}.glb`);
+  if (!res.ok) throw new Error('Failed to fetch model');
+  const arrayBuffer = await res.arrayBuffer();
+
+  const loader = new GLTFLoader();
+  const gltf = await new Promise<{ scene: THREE.Group }>((resolve, reject) => {
+    loader.parse(arrayBuffer, '', resolve, reject);
+  });
+
+  const box = new THREE.Box3().setFromObject(gltf.scene);
+  const size = box.getSize(new THREE.Vector3());
+
+  gltf.scene.traverse((obj) => {
+    if (obj instanceof THREE.Mesh) {
+      obj.geometry?.dispose();
+      if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+      else obj.material?.dispose();
+    }
+  });
+
+  return {
+    altura: String(Math.round(size.y * 100 * 100) / 100),
+    largura: String(Math.round(size.x * 100 * 100) / 100),
+    profundidade: String(Math.round(size.z * 100 * 100) / 100),
+  };
 }

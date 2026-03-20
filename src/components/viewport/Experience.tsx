@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef} from 'react';
+import { useMemo, useState, useRef, useEffect} from 'react';
 import * as THREE from 'three';
 import { DragControls, Grid, OrbitControls, PresentationControls } from '@react-three/drei';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -59,6 +59,7 @@ export function Experience({
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const [hoveredObject, setHoveredObject] = useState<THREE.Object3D | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const prevObjectCount = useRef(0);
 
   const isMobile = window.innerWidth <= 768;
   // Cores para o fundo
@@ -67,6 +68,10 @@ export function Experience({
   // Compute proportional X positions based on each object's scaled size
   const objectPositions = useMemo(() => {
     const sizes = currentObjects.map(obj => {
+      if (obj.dimensions?.largura) {
+        const w = parseFloat(obj.dimensions.largura) / 100;
+        if (!isNaN(w) && w > 0) return w;
+      }
       if (obj.dimensions?.altura) {
         const h = parseFloat(obj.dimensions.altura) / 100;
         if (!isNaN(h) && h > 0) return h;
@@ -177,6 +182,23 @@ export function Experience({
   
 
   
+  // Auto-focus camera on the first object when it is added
+  useEffect(() => {
+    if (prevObjectCount.current === 0 && currentObjects.length > 0 && controlsRef.current) {
+      const firstObject = currentObjects[0];
+      const x = objectPositions[0] ?? 0;
+      let distance = 1.5;
+      if (firstObject.dimensions?.altura) {
+        const h = parseFloat(firstObject.dimensions.altura) / 100;
+        if (!isNaN(h) && h > 0) distance = h + 0.08;
+      }
+      camera.position.set(x, distance * 0.5, distance);
+      controlsRef.current.target.set(x, 0, 0);
+      controlsRef.current.update();
+    }
+    prevObjectCount.current = currentObjects.length;
+  }, [currentObjects.length]);
+
   const handleBackgroundClick = () => {
     clearSelection();
   };

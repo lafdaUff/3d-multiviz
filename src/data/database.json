@@ -4,7 +4,9 @@
     "link": "aborigene",
     "thumb": "aborigene",
     "dimensions": {
-      "altura": "8.3"
+      "altura": "8.3",
+      "largura": "4.8",
+      "profundidade": "3.65"
     },
     "customdata": [
       {
@@ -34,7 +36,9 @@
     "link": "hipopotamo",
     "thumb": "hipopotamo",
     "dimensions": {
-      "altura": "8.7"
+      "altura": "8.7",
+      "largura": "7.1",
+      "profundidade": "10.86"
     },
     "customdata": [
       {
@@ -64,7 +68,9 @@
     "link": "pinoquio",
     "thumb": "pinoquio",
     "dimensions": {
-      "altura": "23.5"
+      "altura": "23.4",
+      "largura": "5.75",
+      "profundidade": "5.41"
     },
     "customdata": [
       {
@@ -94,7 +100,9 @@
     "link": "tartaruga_marajoara",
     "thumb": "tartaruga",
     "dimensions": {
-      "altura": "4.4"
+      "altura": "4.4",
+      "largura": "6.92",
+      "profundidade": "9.23"
     },
     "customdata": [
       {
@@ -124,7 +132,9 @@
     "link": "vaso_marajoara",
     "thumb": "vaso",
     "dimensions": {
-      "altura": "7"
+      "altura": "7",
+      "largura": "6.32",
+      "profundidade": "6.3"
     },
     "customdata": [
       {
@@ -154,7 +164,9 @@
     "link": "boneca_de_pano",
     "thumb": "boneca",
     "dimensions": {
-      "altura": "23"
+      "altura": "23",
+      "largura": "9.67",
+      "profundidade": "9.64"
     },
     "customdata": [
       {
@@ -184,34 +196,39 @@
     "link": "escultura_feminina_terracota",
     "thumb": "escultura",
     "dimensions": {
-      "altura": "8"
-    },
-    "customdata": []
+      "altura": "8",
+      "largura": "8.63",
+      "profundidade": "4.18"
+    }
   },
   {
     "nome": "Máscara Preta e Dourada",
     "link": "mascara_preta_dourada",
     "thumb": "mascara",
     "dimensions": {
-      "altura": "10"
-    },
-    "customdata": []
+      "altura": "10",
+      "largura": "10.75",
+      "profundidade": "11.07"
+    }
   },
   {
     "nome": "Souvenir de Lhama",
     "link": "souvenir_lhama",
     "thumb": "lhama",
     "dimensions": {
-      "altura": "23.5"
-    },
-    "customdata": []
+      "altura": "23.5",
+      "largura": "12.1",
+      "profundidade": "17.67"
+    }
   },
   {
     "nome": "Triciclo Anos 80",
     "link": "triciclo_anos_80",
     "thumb": "triciclo",
     "dimensions": {
-      "altura": "16"
+      "altura": "16",
+      "largura": "9.8",
+      "profundidade": "12.17"
     },
     "customdata": [
       {
