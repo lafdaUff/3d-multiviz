@@ -21,20 +21,24 @@ interface ModelProps{
 export default function Model({modelLink, positionMode, onHover, onClick, dimensions} : ModelProps){
     const { scene } = useGLTF(`/modelos/${modelLink}.glb`)
 
-    const clonedScene = useMemo(() => {
+    const { clonedScene, modelHeight } = useMemo(() => {
         const clone = scene.clone()
         clone.traverse(child => {
             if(child instanceof THREE.Mesh) {
                 child.userData = {link: modelLink}
             }
         })
-        return clone
-    }, [scene, modelLink])
 
-    const bottomY = useMemo(() => {
-        const boundingBox = new THREE.Box3().setFromObject(clonedScene)
-        return boundingBox.min.y
-    }, [clonedScene])
+        const box = new THREE.Box3().setFromObject(clone)
+        const height = box.max.y - box.min.y
+
+        // Wrap in a group with origin at the bottom of the mesh
+        const group = new THREE.Group()
+        clone.position.y -= box.min.y  // shift clone so its bottom is at Y=0 in group space
+        group.add(clone)
+
+        return { clonedScene: group, modelHeight: height }
+    }, [scene, modelLink])
 
     const resolvedDimensions = useMemo(() => {
         if (!dimensions?.altura) return null
@@ -56,13 +60,10 @@ export default function Model({modelLink, positionMode, onHover, onClick, dimens
         if (!resolvedDimensions) return 1
 
         const desiredHeight = resolvedDimensions.altura / 100 // cm to meters (1 unit = 1m)
+        if (modelHeight <= 0) return 1
 
-        const boundingBox = new THREE.Box3().setFromObject(clonedScene)
-        const actualHeight = boundingBox.max.y - boundingBox.min.y
-        if (actualHeight <= 0) return 1
-
-        return desiredHeight / actualHeight
-    }, [clonedScene, resolvedDimensions])
+        return desiredHeight / modelHeight
+    }, [modelHeight, resolvedDimensions])
 
 
 
@@ -88,7 +89,7 @@ export default function Model({modelLink, positionMode, onHover, onClick, dimens
         <primitive
             object={clonedScene}
             scale={[scaleFactor, scaleFactor, scaleFactor]}
-            position={positionMode === 'base' ? [0, -bottomY * scaleFactor, 0] : [0, 0, 0]}
+            position={positionMode === 'base' ? [0, 0, 0] : [0, -(modelHeight / 2) * scaleFactor, 0]}
             onClick={handleClick}
             onPointerOver={handlePointerOver}
             onPointerOut={handlePointerOut}
