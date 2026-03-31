@@ -61,7 +61,6 @@ export function Experience({
   const [isDragging, setIsDragging] = useState(false);
   const prevObjectCount = useRef(0);
 
-  const isMobile = window.innerWidth <= 768;
   // Cores para o fundo
   const bgColor = useRadialGradientBackground('#2b2b2b', '#1c1c1c');
 
@@ -203,8 +202,6 @@ export function Experience({
     clearSelection();
   };
 
-  const cameraDistance = isMobile ? 2 : 1;
-
   if (cameraLock) {
     if (controlsRef.current) {
       const maxHeight = currentObjects.reduce((max, obj) => {
@@ -214,10 +211,25 @@ export function Experience({
         }
         return max;
       }, 0);
-      const baseZ = maxHeight > 0
-        ? maxHeight * 2.5 * currentObjects.length
-        : cameraDistance * currentObjects.length;
-      const yOffset = maxHeight > 0 ? maxHeight * 1.5 : 0.5;
+
+      const perspCam = camera as THREE.PerspectiveCamera;
+      const vFov = perspCam.fov * (Math.PI / 180);
+      const aspect = perspCam.aspect || 1;
+
+      const totalWidth = objectPositions.length > 1
+        ? objectPositions[objectPositions.length - 1] - objectPositions[0]
+        : 0;
+
+      const effectiveHeight = maxHeight > 0 ? maxHeight : 1;
+      // Distance needed to fit the tallest model vertically (with padding)
+      const distForHeight = (effectiveHeight * 2.2) / (2 * Math.tan(vFov / 2));
+      // Distance needed to fit all objects horizontally (with padding)
+      const distForWidth = totalWidth > 0
+        ? (totalWidth * 2.2) / (2 * Math.tan(vFov / 2) * aspect)
+        : 0;
+
+      const baseZ = Math.max(distForHeight, distForWidth);
+      const yOffset = effectiveHeight * 0.5;
       const centerX = objectPositions.length > 0
         ? (objectPositions[0] + objectPositions[objectPositions.length - 1]) / 2
         : 0;
