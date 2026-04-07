@@ -1,92 +1,20 @@
-# 3D MultiViz - Visualizador 3D para Patrimônio Cultural
-
-**3D MultiViz** é uma plataforma de código aberto para multivisualização de artefatos de patrimônio cultural em 3D. Desenvolvida com tecnologias web modernas, a ferramenta permite que pesquisadores, estudantes e o público em geral explorem coleções digitais de forma interativa.
-
-Este projeto é uma iniciativa do **Laboratório de Artefatos Físicos, Digitais e Algorítmicos (Lafda)** da **Universidade Federal Fluminense (UFF)**.
-
+# README
+ 
+Você irá se deparar com 2 janelas já abertas (em tela dividida). Essas janelas são o **README.md** (que você está lendo esse texto) e a janela do **visualizador 3D**, situada à direita desta tela.
+ 
+A janela do visualizador pode ser aberta em uma nova aba para melhor visualização clicando no ícone das duas janelas <img width="25" height="25" alt="icone_janelas" src="https://github.com/user-attachments/assets/c4ec2f46-df28-429e-81c9-932423b99ef3" />. Ele se encontra no canto superior direito da janela do visualizador, ao lado das reticências.
+ 
+> **OBS:** Caso não estejam visíveis tais janelas, recomenda-se abrir o link do code-sandbox em uma guia anônima, para que os dados da sua última interação não fiquem salvos.
+ 
 ---
-
-## Funcionalidades
-
-- **Visualização Interativa**: Navegue, rotacione, aplique zoom e explore modelos 3D.
-- **Multivisualização**: Carregue e compare múltiplos artefatos simultaneamente na mesma cena.
-- **Anotações e Metadados**: Associe informações, notas e dados históricos diretamente aos modelos 3D.
-- **Interface Responsiva**: Acessível em desktops, tablets e dispositivos móveis.
-
----
-
-## Manual de Instalação
-
-Para executar este projeto localmente, você precisará ter o **Node.js** (versão 18 ou superior) e o **npm** instalados em sua máquina.
-
-### 1. Clone o Repositório
-
-```bash
-git clone https://github.com/lafdaUff/3d-multiviz.git
-cd 3d-multiviz
-```
-
-### 2. Instale as Dependências
-
-```bash
-npm install
-```
-
-### 3. Inicie o Servidor de Desenvolvimento
-
-```bash
-npm run dev
-```
-
-O terminal exibirá o endereço local para acessar a aplicação (geralmente `http://localhost:5173`).  
-Abra este link no seu navegador para ver o projeto em execução.
-
-### 4. Gerando a Versão de Produção (Build)
-
-```bash
-npm run build
-```
-
-Os arquivos finais serão gerados na pasta `dist/`, prontos para serem implantados em um servidor web.
-
----
-
-## Tecnologias Utilizadas
-
-- [**Vite**](https://vitejs.dev): Ferramenta de build e desenvolvimento rápido para projetos web.
-- [**React.js**](https://reactjs.org): Biblioteca para construção de interfaces de usuário.
-- [**React Three Fiber**](https://docs.pmnd.rs/react-three-fiber): Renderizador React para Three.js, simplificando a criação de cenas 3D.
-
----
-
-## Como Contribuir
-
-Contribuições são muito bem-vindas! Siga os passos abaixo para colaborar:
-
-1. Faça um **fork** do projeto.
-2. Crie uma **branch** para sua nova funcionalidade:
-   ```bash
-   git checkout -b feature/minha-feature
-   ```
-3. Faça o **commit** de suas alterações:
-   ```bash
-   git commit -m 'Adiciona nova funcionalidade'
-   ```
-4. Envie para a sua branch:
-   ```bash
-   git push origin feature/minha-feature
-   ```
-5. Abra um **Pull Request**.
-
----
-
-## Licença
-
-
-
----
-
-## Agradecimentos
-
-Este trabalho é fruto das pesquisas e do desenvolvimento realizado no **Laboratório de Artefatos Físicos, Digitais e Algorítmicos (Lafda)** da **Universidade Federal Fluminense (UFF)**.  
-Agradecemos a todos os pesquisadores, desenvolvedores e colaboradores que tornaram este projeto possível.
+ 
+## GUIA PARA ADIÇÃO DOS MODELOS AUTOMATICAMENTE
+ 
+Para adicionar os arquivos de modo automático, clique com o botão direito nos locais indicados abaixo e busque a opção **upload**. Selecione os respectivos arquivos e realize o upload.
+ 
+1. Os arquivos de modelos **.glb** devem ser adicionados na pasta `public >> modelos`
+2. Os arquivos de imagens **thumbnails** devem ser adicionados em `public >> thumbnails`
+3. Os dois arquivos **JSON** devem ser adicionados à pasta `src >> data`
+ 
+Essas pastas são encontradas no explorador, na lateral esquerda da tela inicial do code-sandbox.
+ 
