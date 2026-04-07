@@ -1,6 +1,12 @@
 import i18n from "../../i18n";
 import ModeSelector from "./ModeSelector";
 import { useTranslation } from "react-i18next";
+import { useDataFile } from "../../dev/useDataManager";
+
+interface CollectionConfig {
+  nome?: string;
+  autoria?: string;
+}
 
 interface TopBarProps {
   toggleInfoScreen?: () => void;
@@ -27,12 +33,13 @@ export default function TopBar({toggleInfoScreen, toggleLock, isCameraLocked} : 
   }
 
   const { t } = useTranslation();
-  
+  const { data: config } = useDataFile<CollectionConfig>('collectionconfig');
+
   return (
     <div className="viewportTop flex">
       <div className="viewportTitle">
-            <h5 id="objectName">{t("collection.name")}</h5>
-            <p id="objectDesc">{t("collection.desc")}</p>
+            <h5 id="objectName">{config?.nome || t("collection.name")}</h5>
+            <p id="objectDesc">{config?.autoria || t("collection.desc")}</p>
       </div>
       <div className="viewportInteraction flex">
         <p id="lock-btn" className="viewportBtn" onClick={toggleLanguage}>

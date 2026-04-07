@@ -23,11 +23,27 @@ export default function Model({modelLink, positionMode, onHover, onClick, dimens
 
     const { clonedScene, modelHeight } = useMemo(() => {
         const clone = scene.clone()
+
+        clone.updateMatrixWorld(true)
         clone.traverse(child => {
-            if(child instanceof THREE.Mesh) {
-                child.userData = {link: modelLink}
+            if (child instanceof THREE.Mesh) {
+                child.userData = { link: modelLink }
+                child.geometry = child.geometry.clone()
+                child.geometry.applyMatrix4(child.matrixWorld)
+                child.position.set(0, 0, 0)
+                child.rotation.set(0, 0, 0)
+                child.updateMatrix()
             }
         })
+
+        clone.traverse(child => {
+            if (!(child instanceof THREE.Mesh)) {
+                child.position.set(0, 0, 0)
+                child.rotation.set(0, 0, 0)
+                child.updateMatrix()
+            }
+        })
+        clone.updateMatrixWorld(true)
 
         const box = new THREE.Box3().setFromObject(clone)
         const height = box.max.y - box.min.y
@@ -69,8 +85,8 @@ export default function Model({modelLink, positionMode, onHover, onClick, dimens
 
     function handleClick(event: ThreeEvent<MouseEvent>) {
         event.stopPropagation()
-        const targetPosition = new THREE.Vector3()
-        event.object.getWorldPosition(targetPosition)
+        const box = new THREE.Box3().setFromObject(clonedScene)
+        const targetPosition = box.getCenter(new THREE.Vector3())
         onClick(modelLink, targetPosition)
     }
     function handlePointerOver(event: ThreeEvent<PointerEvent>) {

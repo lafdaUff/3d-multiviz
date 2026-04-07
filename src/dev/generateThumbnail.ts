@@ -9,6 +9,23 @@ export interface ModelDimensions {
   profundidade: string;
 }
 
+function applyTransforms(root: THREE.Object3D): void {
+  root.updateMatrixWorld(true);
+  root.traverse(child => {
+    if (child instanceof THREE.Mesh) {
+      child.geometry = child.geometry.clone();
+      child.geometry.applyMatrix4(child.matrixWorld);
+    }
+  });
+  root.traverse(child => {
+    child.position.set(0, 0, 0);
+    child.rotation.set(0, 0, 0);
+    child.scale.set(1, 1, 1);
+    child.updateMatrix();
+  });
+  root.updateMatrixWorld(true);
+}
+
 export async function generateThumbnail(glbFile: File): Promise<{ blob: Blob; dimensions: ModelDimensions }> {
   const arrayBuffer = await glbFile.arrayBuffer();
 
@@ -16,6 +33,8 @@ export async function generateThumbnail(glbFile: File): Promise<{ blob: Blob; di
   const gltf = await new Promise<{ scene: THREE.Group }>((resolve, reject) => {
     loader.parse(arrayBuffer, '', resolve, reject);
   });
+
+  applyTransforms(gltf.scene);
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1a1a1a);
@@ -89,6 +108,8 @@ export async function extractDimensions(modelSlug: string): Promise<ModelDimensi
   const gltf = await new Promise<{ scene: THREE.Group }>((resolve, reject) => {
     loader.parse(arrayBuffer, '', resolve, reject);
   });
+
+  applyTransforms(gltf.scene);
 
   const box = new THREE.Box3().setFromObject(gltf.scene);
   const size = box.getSize(new THREE.Vector3());
