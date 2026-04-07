@@ -1,4 +1,4 @@
-# README
+# MODO AUTOMÁTICO
  
 Você irá se deparar com 2 janelas já abertas (em tela dividida). Essas janelas são o **README.md** (que você está lendo esse texto) e a janela do **visualizador 3D**, situada à direita desta tela.
  
