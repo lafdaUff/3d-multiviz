@@ -385,18 +385,18 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
               <div className="dm-field">
                 <label className="dm-field-label">Link <span className="dm-field-label-hint">*Auto do arquivo</span></label>
                 <input
-                  className="dm-field-input"
+                  className="dm-field-input dm-field-input-disabled"
                   value={form.link}
-                  onChange={e => setForm({ link: e.target.value })}
+                  readOnly
                   placeholder="slug_do_modelo"
                 />
               </div>
               <div className="dm-field">
                 <label className="dm-field-label">Thumb <span className="dm-field-label-hint">*Auto do link</span></label>
                 <input
-                  className="dm-field-input"
+                  className="dm-field-input dm-field-input-disabled"
                   value={form.thumb}
-                  onChange={e => setForm({ thumb: e.target.value })}
+                  readOnly
                   placeholder={form.link || 'thumbnail'}
                 />
               </div>

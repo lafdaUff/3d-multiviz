@@ -36,10 +36,10 @@ i18n
             "moreInfo": "For more information, visit the",
             "lafdaSite": "Lafda website",
             "navigate": "Navigate",
-            "step1": {"label": "Orbit", "description": "Left click + drag / drag with one finger (touch)"},
+            "step1": {"label": "Orbit", "description": "Left click + drag / drag with one finger (touch). The orbit is around the object."},
             "step2": {"label": "Zoom", "description": "Scroll wheel / pinch (touch)"},
-            "step3": {"label": "Mode", "description": "Right click + drag / two-finger drag (touch)"},
-            "step4": {"label": "Select", "description": "Left click / single tap (touch)"}
+            "step3": {"label": "Select", "description": "Left click / single tap (touch)"},
+            "step4": {"label": "Position", "description": "Click on the object and drag to reposition it"}
           },
           "search": {"placeholder": "Search"}
         }
@@ -55,10 +55,10 @@ i18n
             "moreInfo": "Para mais informações, acesse o",
             "lafdaSite": "site do Lafda",
             "navigate": "Navegar",
-            "step1": {"label": "Órbita", "description": "Clique esquerdo + arraste / arraste com um dedo (touch)"},
+            "step1": {"label": "Órbita", "description": "Clique esquerdo + arraste / arraste com um dedo (touch). A órbita é ao redor do objeto."},
             "step2": {"label": "Zoom", "description": "Segure ou role o scroll / Faça pinça (touch)"},
-            "step3": {"label": "Modo", "description": "Clique direito + arraste / Arraste com dois dedos (touch)"},
-            "step4": {"label": "Selecionar", "description": "Clique esquerdo / toque único (touch)"}
+            "step3": {"label": "Selecionar", "description": "Clique esquerdo / toque único (touch)"},
+            "step4": {"label": "Posicionar", "description": "Clique no objeto e arraste para reposicioná-lo"}
           },
             "search": {"placeholder": "Pesquisar"}
         }
