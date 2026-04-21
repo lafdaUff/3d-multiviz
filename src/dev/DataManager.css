@@ -145,6 +145,10 @@
   outline: none;
   border-color: #fff;
 }
+.dm-field-input-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .dm-field-textarea {
   background: var(--secondary-color);
