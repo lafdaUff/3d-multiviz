@@ -11,7 +11,7 @@ export default function Viewport({ onObjectSelect }: { onObjectSelect: (data: Mo
 
     const { currentObjects } = useContext(ObjectsContext);
 
-    const [isInfoScreenVisible, setInfoScreenVisible] = useState(false);
+    const [isInfoScreenVisible, setInfoScreenVisible] = useState(true);
     const [isCameraLocked, setCameraLocked] = useState(false);
     const [masterCamera, setMasterCamera] = useState<number | null>(null);
 

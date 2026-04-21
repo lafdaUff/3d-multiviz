@@ -18,12 +18,12 @@ export default function InfoScreen({toggleInfoScreen} : {toggleInfoScreen?: () =
                 <p>{t("tutorial.step2.description")}</p>
             </div>
             <div className="navHelpItem">
-                <i className="fa-solid fa-up-down-left-right"></i>
+                <i className="fa-solid fa-hand-pointer"></i>
                 <p><span>{t("tutorial.step3.label")}</span></p>
                 <p>{t("tutorial.step3.description")}</p>
             </div>
             <div className="navHelpItem">
-                <i className="fa-solid fa-hand-pointer"></i>
+                <i className="fa-solid fa-arrows-up-down-left-right"></i>
                 <p><span>{t("tutorial.step4.label")}</span></p>
                 <p>{t("tutorial.step4.description")}</p>
             </div>
