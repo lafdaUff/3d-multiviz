@@ -90,10 +90,65 @@ small{
 }
 
 .clip-left{
-  clip-path: polygon(0 0, 50% 0, 50% 100%, 0% 100%);
+  clip-path: polygon(0 0, var(--split, 50%) 0, var(--split, 50%) 100%, 0% 100%);
 }
 .clip-right{
-  clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+  clip-path: polygon(var(--split, 50%) 0, 100% 0, 100% 100%, var(--split, 50%) 100%);
+}
+
+.split-handle{
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 28px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 5;
+}
+
+.split-handle-line{
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  background-color: var(--text-color);
+}
+
+.split-handle-grip{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: var(--step--1);
+  background-color: var(--renderer-color-2);
+  border: 1px solid var(--text-color);
+  z-index: 1;
+}
+
+/* The cut stays clean until the handle is hovered, focused or dragged */
+.split-handle-line,
+.split-handle-grip{
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.split-handle:hover .split-handle-line,
+.split-handle:hover .split-handle-grip,
+.split-handle:focus-visible .split-handle-line,
+.split-handle:focus-visible .split-handle-grip,
+.split-handle.dragging .split-handle-line,
+.split-handle.dragging .split-handle-grip{
+  opacity: 1;
+}
+
+.split-handle:focus-visible{
+  outline: none;
 }
 
 .canvas-container {

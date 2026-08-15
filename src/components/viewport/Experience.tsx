@@ -1,11 +1,12 @@
 import { useMemo, useState, useRef, useEffect, useCallback} from 'react';
 import * as THREE from 'three';
-import { DragControls, Grid, OrbitControls } from '@react-three/drei';
+import { Grid, OrbitControls } from '@react-three/drei';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { EffectComposer, Outline } from '@react-three/postprocessing';
 import { useThree, useFrame } from '@react-three/fiber';
 import gsap from 'gsap';
 import Model from './Model';
+import DraggableModel, { type DragOffsets } from './DraggableModel';
 import { RotationGesture, RotationGroup } from './RotationControls';
 import data from '../../data/database.json' with { type: 'json' }; 
 
@@ -32,6 +33,7 @@ interface ExperienceProps {
   onViewChange?: (changed: boolean) => void;
   onHoverChange?: (hovered: boolean) => void;
   selectedLink?: string | null;
+  dragOffsets?: React.RefObject<DragOffsets>;
 }
 
 function useRadialGradientBackground(color1: string, color2: string) {
@@ -62,7 +64,8 @@ export function Experience({
   resetToken = 0,
   onViewChange,
   onHoverChange,
-  selectedLink = null
+  selectedLink = null,
+  dragOffsets
 }: ExperienceProps) {
   const { camera, scene } = useThree();
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
@@ -169,6 +172,9 @@ export function Experience({
 
     // With the camera locked the framing is fixed, so only the metadata is shown
     if (!controlsRef.current || cameraLock) return;
+
+    // Focusing moves the camera, so the view can be reset afterwards
+    markViewChanged();
 
     gsap.killTweensOf([controlsRef.current.target, camera.position]);
 
@@ -296,15 +302,20 @@ export function Experience({
   }, [cameraLock, fitCameraToObjects]);
 
   const handleCameraStart = useCallback(() => {
-    if (cameraLock) markViewChanged();
-  }, [cameraLock, markViewChanged]);
+    markViewChanged();
+  }, [markViewChanged]);
 
   const resetView = useRef<() => void>(undefined);
   resetView.current = () => {
     rotationTarget.current = [0, 0, 0];
     isViewChanged.current = false;
     onViewChange?.(false);
-    if (cameraLock) fitCameraToObjects();
+
+    if (controlsRef.current) {
+      gsap.killTweensOf([controlsRef.current.target, camera.position]);
+      controlsRef.current.enabled = true;
+    }
+    fitCameraToObjects();
   };
 
   useEffect(() => {
@@ -367,20 +378,18 @@ export function Experience({
             />
           ) : 
           (
-            <DragControls
-              axisLock='y'
-              autoTransform={true}
-              onDragStart={() => setIsDragging(true)}
+            <DraggableModel
+              modelInfo={modelInfo}
+              offsets={dragOffsets}
+              resetToken={resetToken}
+              onHover={handleHover}
+              onClick={handleModelClick}
+              onDragStart={() => {
+                setIsDragging(true);
+                markViewChanged();
+              }}
               onDragEnd={() => setTimeout(() => setIsDragging(false), 0)}
-            >
-              <Model
-                modelLink={modelInfo.link}
-                positionMode='base'
-                onHover={handleHover}
-                onClick={handleModelClick}
-                dimensions={modelInfo.dimensions}
-              />
-            </DragControls>
+            />
           )
           }
         </group>
