@@ -1,11 +1,12 @@
-import { useMemo, useState, useRef, useEffect} from 'react';
+import { useMemo, useState, useRef, useEffect, useCallback} from 'react';
 import * as THREE from 'three';
-import { DragControls, Grid, OrbitControls, PresentationControls } from '@react-three/drei';
+import { DragControls, Grid, OrbitControls } from '@react-three/drei';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { EffectComposer, Outline } from '@react-three/postprocessing';
 import { useThree, useFrame } from '@react-three/fiber';
 import gsap from 'gsap';
 import Model from './Model';
+import { RotationGesture, RotationGroup } from './RotationControls';
 import data from '../../data/database.json' with { type: 'json' }; 
 
 export interface ModelData {
@@ -27,6 +28,8 @@ interface ExperienceProps {
   cameraLock?: boolean;
   syncedCameraRef?: React.RefObject<OrbitControlsImpl | null> | null;
   isMaster?: boolean;
+  resetToken?: number;
+  onRotationChange?: (rotated: boolean) => void;
 }
 
 function useRadialGradientBackground(color1: string, color2: string) {
@@ -51,15 +54,31 @@ function useRadialGradientBackground(color1: string, color2: string) {
 export function Experience({ 
   onObjectSelect, 
   currentObjects = [], 
-  cameraLock = false, 
+  cameraLock = false,
   syncedCameraRef,
-  isMaster = false 
+  isMaster = false,
+  resetToken = 0,
+  onRotationChange
 }: ExperienceProps) {
   const { camera } = useThree();
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const [hoveredObject, setHoveredObject] = useState<THREE.Object3D | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const prevObjectCount = useRef(0);
+  const rotationTarget = useRef<[number, number, number]>([0, 0, 0]);
+  const isRotated = useRef(false);
+
+  const handleRotate = useCallback(() => {
+    if (isRotated.current) return;
+    isRotated.current = true;
+    onRotationChange?.(true);
+  }, [onRotationChange]);
+
+  useEffect(() => {
+    rotationTarget.current = [0, 0, 0];
+    isRotated.current = false;
+    onRotationChange?.(false);
+  }, [resetToken, onRotationChange]);
 
   // Cores para o fundo
   const bgColor = useRadialGradientBackground('#2b2b2b', '#1c1c1c');
@@ -265,20 +284,15 @@ export function Experience({
       {(!cameraLock && !syncedCameraRef) && (
         <Grid infiniteGrid cellColor="gray" sectionColor="#2b2b2b" cellSize={1} sectionSize={2} fadeDistance={70} fadeStrength={0.5} />
       )}
-      
+
+      {cameraLock && <RotationGesture target={rotationTarget} onRotate={handleRotate} />}
+
 
       {/* Renderiza todos os modelos do arquivo de dados */}
       {currentObjects.map((modelInfo, index) => (
         <group key={modelInfo.link} position={[objectPositions[index] ?? 0, 0, 0]} >
           {cameraLock ? (
-            <PresentationControls 
-              cursor={false}
-              enabled={true}
-              polar={[-Infinity, Infinity]}
-              snap={true}
-              speed={1.5}
-              global={true}
-            >
+            <RotationGroup target={rotationTarget}>
               <Model
                 modelLink={modelInfo.link}
                 positionMode='center'
@@ -286,7 +300,7 @@ export function Experience({
                 onClick={handleModelClick}
                 dimensions={modelInfo.dimensions}
               />
-            </PresentationControls>
+            </RotationGroup>
           ) : syncedCameraRef ? (
             <Model
               modelLink={modelInfo.link}

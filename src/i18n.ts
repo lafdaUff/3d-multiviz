@@ -41,6 +41,7 @@ i18n
             "step3": {"label": "Select", "description": "Left click / single tap (touch) to view metadata"},
             "step4": {"label": "Position", "description": "Click on the object and drag to reposition it"}
           },
+          "viewport": {"resetRotation": "Reset rotation"},
           "search": {"placeholder": "Search"}
         }
       },
@@ -60,6 +61,7 @@ i18n
             "step3": {"label": "Selecionar", "description": "clique esquerdo / toque único (touch) para visualizar metadados"},
             "step4": {"label": "Posicionar", "description": "Clique no objeto e arraste para reposicioná-lo"}
           },
+            "viewport": {"resetRotation": "Redefinir rotação"},
             "search": {"placeholder": "Pesquisar"}
         }
       }
