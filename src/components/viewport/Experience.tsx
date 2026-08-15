@@ -336,7 +336,7 @@ export function Experience({
         enableDamping
         enabled={isMaster || !syncedCameraRef}
         enableRotate={!cameraLock}
-        zoomToCursor
+        zoomToCursor={!syncedCameraRef}
         onStart={handleCameraStart}
         dampingFactor={0.25}
         makeDefault
