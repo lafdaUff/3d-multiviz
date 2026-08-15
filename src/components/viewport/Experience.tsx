@@ -29,7 +29,9 @@ interface ExperienceProps {
   syncedCameraRef?: React.RefObject<OrbitControlsImpl | null> | null;
   isMaster?: boolean;
   resetToken?: number;
-  onRotationChange?: (rotated: boolean) => void;
+  onViewChange?: (changed: boolean) => void;
+  onHoverChange?: (hovered: boolean) => void;
+  selectedLink?: string | null;
 }
 
 function useRadialGradientBackground(color1: string, color2: string) {
@@ -58,27 +60,56 @@ export function Experience({
   syncedCameraRef,
   isMaster = false,
   resetToken = 0,
-  onRotationChange
+  onViewChange,
+  onHoverChange,
+  selectedLink = null
 }: ExperienceProps) {
-  const { camera } = useThree();
+  const { camera, scene } = useThree();
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const [hoveredObject, setHoveredObject] = useState<THREE.Object3D | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const prevObjectCount = useRef(0);
   const rotationTarget = useRef<[number, number, number]>([0, 0, 0]);
-  const isRotated = useRef(false);
+  const hasRotated = useRef(false);
+  const isViewChanged = useRef(false);
 
-  const handleRotate = useCallback(() => {
-    if (isRotated.current) return;
-    isRotated.current = true;
-    onRotationChange?.(true);
-  }, [onRotationChange]);
+  const handleHover = useCallback((mesh: THREE.Object3D | null) => {
+    setHoveredObject(mesh);
+    onHoverChange?.(mesh !== null);
+  }, [onHoverChange]);
+
+  // Meshes of the model whose metadata is open, so its outline stays visible
+  const [selectedMeshes, setSelectedMeshes] = useState<THREE.Object3D[]>([]);
+
+  // Each wrapper renders its own Model instance, so changing mode rebuilds the meshes
+  const modelTreeKey = cameraLock ? 'rotation' : syncedCameraRef ? 'synced' : 'drag';
 
   useEffect(() => {
-    rotationTarget.current = [0, 0, 0];
-    isRotated.current = false;
-    onRotationChange?.(false);
-  }, [resetToken, onRotationChange]);
+    if (!selectedLink || !currentObjects.some(obj => obj.link === selectedLink)) {
+      setSelectedMeshes(prev => (prev.length === 0 ? prev : []));
+      return;
+    }
+
+    const meshes: THREE.Object3D[] = [];
+    scene.traverse(child => {
+      if (child instanceof THREE.Mesh && child.userData.link === selectedLink) {
+        meshes.push(child);
+      }
+    });
+    setSelectedMeshes(meshes);
+  }, [selectedLink, scene, currentObjects, modelTreeKey]);
+
+  const outlinedObjects = useMemo(() => {
+    if (!hoveredObject) return selectedMeshes;
+    if (selectedMeshes.includes(hoveredObject)) return selectedMeshes;
+    return [...selectedMeshes, hoveredObject];
+  }, [selectedMeshes, hoveredObject]);
+
+  const markViewChanged = useCallback(() => {
+    if (isViewChanged.current) return;
+    isViewChanged.current = true;
+    onViewChange?.(true);
+  }, [onViewChange]);
 
   // Cores para o fundo
   const bgColor = useRadialGradientBackground('#2b2b2b', '#1c1c1c');
@@ -134,15 +165,14 @@ export function Experience({
 
   // Função para focar na câmera
   const focusOnObject = (modelData: ModelData, position: THREE.Vector3) => {
-    if (!controlsRef.current) return;
-    if (cameraLock) return;
-    
-    gsap.killTweensOf([controlsRef.current.target, camera.position]);
-
-    
     onObjectSelect(modelData);
 
-   
+    // With the camera locked the framing is fixed, so only the metadata is shown
+    if (!controlsRef.current || cameraLock) return;
+
+    gsap.killTweensOf([controlsRef.current.target, camera.position]);
+
+
     controlsRef.current.enabled = false;
 
     gsap.to(controlsRef.current.target, {
@@ -190,7 +220,7 @@ export function Experience({
 
   
   const handleModelClick = (modelLink: string, targetPosition: THREE.Vector3) => {
-    if (isDragging) return; 
+    if (isDragging || hasRotated.current) return;
     
     const modelData = data.find(item => item.link === modelLink);
     if (modelData) {
@@ -218,44 +248,68 @@ export function Experience({
   }, [currentObjects.length]);
 
   const handleBackgroundClick = () => {
+    if (hasRotated.current) return;
     clearSelection();
   };
 
-  if (cameraLock) {
-    if (controlsRef.current) {
-      const maxHeight = currentObjects.reduce((max, obj) => {
-        if (obj.dimensions?.altura) {
-          const h = parseFloat(obj.dimensions.altura) / 100;
-          if (!isNaN(h) && h > max) return h;
-        }
-        return max;
-      }, 0);
+  const fitCameraToObjects = useCallback(() => {
+    if (!controlsRef.current) return;
 
-      const perspCam = camera as THREE.PerspectiveCamera;
-      const vFov = perspCam.fov * (Math.PI / 180);
-      const aspect = perspCam.aspect || 1;
+    const maxHeight = currentObjects.reduce((max, obj) => {
+      if (obj.dimensions?.altura) {
+        const h = parseFloat(obj.dimensions.altura) / 100;
+        if (!isNaN(h) && h > max) return h;
+      }
+      return max;
+    }, 0);
 
-      const totalWidth = objectPositions.length > 1
-        ? objectPositions[objectPositions.length - 1] - objectPositions[0]
-        : 0;
+    const perspCam = camera as THREE.PerspectiveCamera;
+    const vFov = perspCam.fov * (Math.PI / 180);
+    const aspect = perspCam.aspect || 1;
 
-      const effectiveHeight = maxHeight > 0 ? maxHeight : 1;
-      // Distance needed to fit the tallest model vertically (with padding)
-      const distForHeight = (effectiveHeight * 2.2) / (2 * Math.tan(vFov / 2));
-      // Distance needed to fit all objects horizontally (with padding)
-      const distForWidth = totalWidth > 0
-        ? (totalWidth * 2.2) / (2 * Math.tan(vFov / 2) * aspect)
-        : 0;
+    const totalWidth = objectPositions.length > 1
+      ? objectPositions[objectPositions.length - 1] - objectPositions[0]
+      : 0;
 
-      const baseZ = Math.max(distForHeight, distForWidth);
-      const yOffset = effectiveHeight * 0.5;
-      const centerX = objectPositions.length > 0
-        ? (objectPositions[0] + objectPositions[objectPositions.length - 1]) / 2
-        : 0;
-      camera.position.set(centerX, yOffset, baseZ);
-      camera.lookAt(centerX, 0, 0);
-    }
-  }
+    const effectiveHeight = maxHeight > 0 ? maxHeight : 1;
+    // Distance needed to fit the tallest model vertically (with padding)
+    const distForHeight = (effectiveHeight * 2.2) / (2 * Math.tan(vFov / 2));
+    // Distance needed to fit all objects horizontally (with padding)
+    const distForWidth = totalWidth > 0
+      ? (totalWidth * 2.2) / (2 * Math.tan(vFov / 2) * aspect)
+      : 0;
+
+    const baseZ = Math.max(distForHeight, distForWidth);
+    const yOffset = effectiveHeight * 0.5;
+    const centerX = objectPositions.length > 0
+      ? (objectPositions[0] + objectPositions[objectPositions.length - 1]) / 2
+      : 0;
+
+    camera.position.set(centerX, yOffset, baseZ);
+    controlsRef.current.target.set(centerX, 0, 0);
+    controlsRef.current.update();
+  }, [camera, currentObjects, objectPositions]);
+
+  useEffect(() => {
+    if (!cameraLock) return;
+    fitCameraToObjects();
+  }, [cameraLock, fitCameraToObjects]);
+
+  const handleCameraStart = useCallback(() => {
+    if (cameraLock) markViewChanged();
+  }, [cameraLock, markViewChanged]);
+
+  const resetView = useRef<() => void>(undefined);
+  resetView.current = () => {
+    rotationTarget.current = [0, 0, 0];
+    isViewChanged.current = false;
+    onViewChange?.(false);
+    if (cameraLock) fitCameraToObjects();
+  };
+
+  useEffect(() => {
+    resetView.current?.();
+  }, [resetToken]);
 
   return (
     <>
@@ -266,13 +320,15 @@ export function Experience({
       <directionalLight position={[5, 10, 7.5]} intensity={2} />
 
       {/* Controles*/}
-      <OrbitControls 
-        ref={controlsRef} 
-        enableDamping 
-        enabled={!cameraLock && (isMaster || !syncedCameraRef)} 
-        dampingFactor={0.25} 
-        makeDefault 
-        
+      <OrbitControls
+        ref={controlsRef}
+        enableDamping
+        enabled={isMaster || !syncedCameraRef}
+        enableRotate={!cameraLock}
+        onStart={handleCameraStart}
+        dampingFactor={0.25}
+        makeDefault
+
       />
 
       {/* Background para capturar cliques */}
@@ -285,7 +341,7 @@ export function Experience({
         <Grid infiniteGrid cellColor="gray" sectionColor="#2b2b2b" cellSize={1} sectionSize={2} fadeDistance={70} fadeStrength={0.5} />
       )}
 
-      {cameraLock && <RotationGesture target={rotationTarget} onRotate={handleRotate} />}
+      {cameraLock && <RotationGesture target={rotationTarget} onRotate={markViewChanged} movedRef={hasRotated} />}
 
 
       {/* Renderiza todos os modelos do arquivo de dados */}
@@ -296,7 +352,7 @@ export function Experience({
               <Model
                 modelLink={modelInfo.link}
                 positionMode='center'
-                onHover={setHoveredObject}
+                onHover={handleHover}
                 onClick={handleModelClick}
                 dimensions={modelInfo.dimensions}
               />
@@ -305,7 +361,7 @@ export function Experience({
             <Model
               modelLink={modelInfo.link}
               positionMode='base'
-              onHover={setHoveredObject}
+              onHover={handleHover}
               onClick={handleModelClick}
               dimensions={modelInfo.dimensions}
             />
@@ -320,7 +376,7 @@ export function Experience({
               <Model
                 modelLink={modelInfo.link}
                 positionMode='base'
-                onHover={setHoveredObject}
+                onHover={handleHover}
                 onClick={handleModelClick}
                 dimensions={modelInfo.dimensions}
               />
@@ -333,7 +389,7 @@ export function Experience({
       {/* Efeitos de Pós-processamento */}
       <EffectComposer autoClear={false}>
         <Outline
-          selection={hoveredObject ? [hoveredObject] : []}
+          selection={outlinedObjects}
           visibleEdgeColor={0xffffff}
           hiddenEdgeColor={0xffffff}
           edgeStrength={2}

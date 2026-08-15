@@ -11,7 +11,13 @@ interface RotationProps {
   target: RotationTarget;
 }
 
-export function RotationGesture({ target, onRotate }: RotationProps & { onRotate?: () => void }) {
+interface RotationGestureProps extends RotationProps {
+  onRotate?: () => void;
+  // Set to true while a drag actually moves, so a rotation is not read as a click
+  movedRef?: React.RefObject<boolean>;
+}
+
+export function RotationGesture({ target, onRotate, movedRef }: RotationGestureProps) {
   const gl = useThree(state => state.gl);
   const size = useThree(state => state.size);
 
@@ -21,28 +27,41 @@ export function RotationGesture({ target, onRotate }: RotationProps & { onRotate
   const onRotateRef = useRef(onRotate);
   onRotateRef.current = onRotate;
 
+  const movedRefHolder = useRef(movedRef);
+  movedRefHolder.current = movedRef;
+
   useEffect(() => {
     const el = gl.domElement;
     const prevTouchAction = el.style.touchAction;
     el.style.touchAction = 'none';
 
-    let dragging = false;
+    const activePointers = new Set<number>();
+    let dragId: number | null = null;
     let lastX = 0;
     let lastY = 0;
 
     const handleDown = (event: PointerEvent) => {
-      dragging = true;
+      activePointers.add(event.pointerId);
+      if (movedRefHolder.current) movedRefHolder.current.current = false;
+
+      if (event.button !== 0 || activePointers.size > 1) {
+        dragId = null;
+        return;
+      }
+
+      dragId = event.pointerId;
       lastX = event.clientX;
       lastY = event.clientY;
     };
 
     const handleMove = (event: PointerEvent) => {
-      if (!dragging) return;
+      if (dragId !== event.pointerId) return;
       const dx = event.clientX - lastX;
       const dy = event.clientY - lastY;
       if (dx === 0 && dy === 0) return;
       lastX = event.clientX;
       lastY = event.clientY;
+      if (movedRefHolder.current) movedRefHolder.current.current = true;
 
       const { width, height } = sizeRef.current;
       target.current = [
@@ -54,8 +73,9 @@ export function RotationGesture({ target, onRotate }: RotationProps & { onRotate
       onRotateRef.current?.();
     };
 
-    const handleUp = () => {
-      dragging = false;
+    const handleUp = (event: PointerEvent) => {
+      activePointers.delete(event.pointerId);
+      if (dragId === event.pointerId) dragId = null;
     };
 
     el.addEventListener('pointerdown', handleDown);

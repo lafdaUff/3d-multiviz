@@ -113,6 +113,13 @@ small{
 .viewport:active{
   cursor: grabbing;
 }
+/* Overrides the grab cursor while an object is under the pointer */
+.viewport.hovering-object:hover{
+  cursor: pointer;
+}
+.viewport.hovering-object:active{
+  cursor: grabbing;
+}
 
 .viewportContent{
   position: absolute;
@@ -206,13 +213,13 @@ small{
   justify-content: space-between;
 }
 
-.reset-rotation-wrapper{
+.reset-view-wrapper{
   position: absolute;
   bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
 }
-.reset-rotation{
+.reset-view{
   pointer-events: all;
   display: flex;
   align-items: center;
@@ -456,6 +463,22 @@ ul::-webkit-scrollbar {
   animation-name: fadeIn;
   animation-duration: 0.2s;
   pointer-events: none; 
+}
+
+.hover-tip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 6px 12px;
+  background-color: var(--renderer-color-2);
+  border: 1px solid var(--renderer-color-1);
+  border-radius: 30px;
+  font-size: var(--step--1);
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+  animation: fadeIn 0.15s ease-in;
 }
 
 .tooltip.visible {

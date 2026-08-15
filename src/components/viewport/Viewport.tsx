@@ -2,13 +2,19 @@ import { Canvas } from '@react-three/fiber'
 import TopBar from './TopBar'
 import BottomBar from './BottomBar'
 import InfoScreen from './InfoScreen'
-import ResetRotationButton from './ResetRotationButton'
+import ResetViewButton from './ResetViewButton'
+import HoverTip from './HoverTip'
 import { Experience, type ModelData } from './Experience'
 import { useContext, useState, useRef, useCallback } from 'react'
 import ObjectsContext from '../../ObjectsContext'
 import ModeContext from '../../ModeContext'
 
-export default function Viewport({ onObjectSelect }: { onObjectSelect: (data: ModelData | null) => void }) {
+interface ViewportProps {
+    onObjectSelect: (data: ModelData | null) => void;
+    selectedLink?: string | null;
+}
+
+export default function Viewport({ onObjectSelect, selectedLink = null }: ViewportProps) {
 
     const { currentObjects } = useContext(ObjectsContext);
 
@@ -31,11 +37,15 @@ export default function Viewport({ onObjectSelect }: { onObjectSelect: (data: Mo
     const [selectedMode, setSelectedMode] = useState('mode1');
 
     const [resetToken, setResetToken] = useState(0);
-    const resetRotation = useCallback(() => setResetToken(token => token + 1), []);
+    const resetView = useCallback(() => setResetToken(token => token + 1), []);
 
-    const [isRotated, setRotated] = useState(false);
+    const [isViewChanged, setViewChanged] = useState(false);
+
+    const [isObjectHovered, setObjectHovered] = useState(false);
+    const pointerPosition = useRef({ x: 0, y: 0 });
 
     const handleViewportPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+        pointerPosition.current = { x: e.clientX, y: e.clientY };
         if (selectedMode !== 'mode3' || e.buttons !== 0) return;
         const rect = e.currentTarget.getBoundingClientRect();
         const index = (e.clientX - rect.left) < rect.width / 2 ? 0 : 1;
@@ -44,7 +54,7 @@ export default function Viewport({ onObjectSelect }: { onObjectSelect: (data: Mo
 
 return (
 
-        <div className="viewport flex" id="viewport" onPointerMove={handleViewportPointerMove}>
+        <div className={`viewport flex${isObjectHovered ? ' hovering-object' : ''}`} id="viewport" onPointerMove={handleViewportPointerMove}>
             {selectedMode === 'mode3' ?
                 currentObjects.map(
                 (object, index) => (
@@ -55,18 +65,21 @@ return (
                             cameraLock={isCameraLocked} 
                             syncedCameraRef={cameraControlsRef}
                             isMaster={index === masterCamera}
+                            onHoverChange={setObjectHovered}
+                            selectedLink={selectedLink}
                         />
                     </Canvas>
                 )) :
                 <Canvas camera={{ near: 0.01 }} className='canvas-container' style={{height: '100%', width: '100%'}}>
-                    <Experience onObjectSelect={onObjectSelect} currentObjects={currentObjects} cameraLock={selectedMode === 'mode2'} resetToken={resetToken} onRotationChange={setRotated} />
+                    <Experience onObjectSelect={onObjectSelect} currentObjects={currentObjects} cameraLock={selectedMode === 'mode2'} resetToken={resetToken} onViewChange={setViewChanged} onHoverChange={setObjectHovered} selectedLink={selectedLink} />
                 </Canvas>
             }
             <ModeContext.Provider value={{ currentMode: selectedMode, setCurrentMode: setSelectedMode }}>
                 <div className='viewportContent flex'>
                     <TopBar toggleInfoScreen={ToggleInfoScreen} toggleLock={toggleLock} isCameraLocked={isCameraLocked}/>
                     <BottomBar />
-                    {selectedMode === 'mode2' && isRotated && <ResetRotationButton onClick={resetRotation} />}
+                    {selectedMode === 'mode2' && isViewChanged && <ResetViewButton onClick={resetView} />}
+                    {isObjectHovered && !isInfoScreenVisible && <HoverTip initialPosition={pointerPosition} />}
                     {isInfoScreenVisible && <InfoScreen toggleInfoScreen={ToggleInfoScreen} />}
             </div>
         </ModeContext.Provider>

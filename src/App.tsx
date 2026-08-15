@@ -30,7 +30,7 @@ function App() {
     <div className='hero flex'>
       <ObjectsContext.Provider value={{currentObjects, setCurrentObjects}}>
         <Sidebar objectData={selectedMetadata} cleanMetadata={cleanMetadata} />
-        <Viewport onObjectSelect={handleObjectSelect}/>
+        <Viewport onObjectSelect={handleObjectSelect} selectedLink={selectedMetadata?.link ?? null}/>
       </ObjectsContext.Provider>
       {DataManager && (
         <Suspense fallback={null}>

@@ -91,13 +91,11 @@ export default function Model({modelLink, positionMode, onHover, onClick, dimens
     }
     function handlePointerOver(event: ThreeEvent<PointerEvent>) {
         event.stopPropagation()
-        document.body.style.cursor = 'pointer'
         onHover(event.object)
     }
 
     function handlePointerOut(event: ThreeEvent<PointerEvent>){
         event.stopPropagation();
-        document.body.style.cursor = 'default'
         onHover(null)
     }
 
