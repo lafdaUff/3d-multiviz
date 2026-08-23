@@ -125,6 +125,27 @@ function ModelCard({ item, onEdit, onDelete }: {
   );
 }
 
+function ArrayValueInput({ value, className, onChange }: {
+  value: string[]; className: string; onChange: (v: string[]) => void;
+}) {
+  // guarda o texto digitado (com vírgulas e espaços) enquanto o valor salvo é a lista já separada
+  const [raw, setRaw] = useState(() => value.join(', '));
+
+  const handleChange = (text: string) => {
+    setRaw(text);
+    onChange(text.split(',').map(s => s.trim()).filter(Boolean));
+  };
+
+  return (
+    <input
+      className={className}
+      value={raw}
+      onChange={e => handleChange(e.target.value)}
+      placeholder="Valores separados por vírgula"
+    />
+  );
+}
+
 function CustomDataField({ cd, index, schema, error, onChange, onRemove }: {
   cd: CustomData; index: number;
   schema: SchemaEntry[] | null;
@@ -160,11 +181,10 @@ function CustomDataField({ cd, index, schema, error, onChange, onRemove }: {
 
     if (fieldType === 'array' && Array.isArray(value)) {
       return (
-        <input
+        <ArrayValueInput
           className={inputClass}
-          value={(value as string[]).join(', ')}
-          onChange={e => onChange(index, key, e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
-          placeholder="Valores separados por vírgula"
+          value={value as string[]}
+          onChange={v => onChange(index, key, v)}
         />
       );
     }
@@ -593,7 +613,7 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
               </div>
               {customData.map((cd, i) => (
                 <CustomDataField
-                  key={i}
+                  key={Object.keys(cd)[0] || i}
                   cd={cd}
                   index={i}
                   schema={schema}
