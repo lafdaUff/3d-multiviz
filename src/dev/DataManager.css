@@ -85,6 +85,15 @@
   line-height: 1.2;
 }
 
+.dm-page-subtitle {
+  font-size: 15px;
+  color: rgba(255,255,255,0.65);
+  text-align: center;
+  /* compensa o gap de 48px do .dm-fullscreen */
+  margin: -40px 0 0;
+  line-height: 1.4;
+}
+
 .dm-body {
   width: 100%;
   max-width: 920px;
@@ -620,6 +629,14 @@
   line-height: 1.2;
 }
 
+.dm-meta-section-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  /* compensa o gap de 20px do .dm-meta-section */
+  margin: -14px 0 -8px;
+  line-height: 1.4;
+}
+
 .dm-meta-hr {
   border: none;
   border-top: 1px solid rgba(255,255,255,0.2);
@@ -1102,6 +1119,9 @@
   .dm-fullscreen {
     padding: 24px 16px 80px;
     gap: 28px;
+  }
+  .dm-page-subtitle {
+    margin: -22px 0 0;
   }
   .dm-config-layout {
     flex-direction: column;

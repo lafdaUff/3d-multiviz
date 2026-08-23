@@ -67,7 +67,9 @@ function ModelCard({ item, onEdit, onDelete }: {
         <span className="dm-model-card-name">{item.nome}</span>
         <span className="dm-model-card-slug">{item.link}</span>
         {customCount > 0 && (
-          <span className="dm-model-card-meta">{customCount} metadado{customCount > 1 ? 's' : ''}</span>
+          <span className="dm-model-card-meta">
+            {customCount} metadado{customCount > 1 ? 's' : ''} preenchido{customCount > 1 ? 's' : ''}
+          </span>
         )}
       </div>
       <div className="dm-model-card-actions">
@@ -149,7 +151,11 @@ function CustomDataField({ cd, index, schema, onChange, onRemove }: {
           {field?.name || key}
           <span className="dm-field-label-hint">{TYPE_LABELS[fieldType] || fieldType}</span>
         </span>
-        <button className="dm-meta-action-btn dm-meta-action-danger" onClick={() => onRemove(index)}>✕</button>
+        <button
+          className="dm-meta-action-btn dm-meta-action-danger"
+          title="Remover este metadado do modelo"
+          onClick={() => onRemove(index)}
+        >✕</button>
       </div>
       {renderInput()}
     </div>
@@ -351,8 +357,11 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
 
   const availableFields = schema
     ? schema
-        .map(s => Object.keys(s)[0])
-        .filter(name => !customData.some(cd => Object.keys(cd)[0] === name))
+        .map(s => {
+          const id = Object.keys(s)[0];
+          return { id, name: Object.values(s)[0].name || id };
+        })
+        .filter(f => !customData.some(cd => Object.keys(cd)[0] === f.id))
     : [];
 
   return (
@@ -479,7 +488,7 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
           {(schema && schema.length > 0) && (
             <div className="dm-model-custom-section">
               <div className="dm-model-custom-header">
-                <span className="dm-field-label">Metadados customizados</span>
+                <span className="dm-field-label">Metadados</span>
                 {availableFields.length > 0 && (
                   <div className="dm-select-wrapper dm-model-add-field-select">
                     <select
@@ -487,8 +496,8 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
                       onChange={e => { if (e.target.value) { addCustomField(e.target.value); e.target.value = ''; } }}
                       defaultValue=""
                     >
-                      <option value="" disabled>+ Adicionar campo</option>
-                      {availableFields.map(f => <option key={f} value={f}>{f}</option>)}
+                      <option value="" disabled>+ Preencher campo</option>
+                      {availableFields.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
                     </select>
                     <span className="dm-select-arrow">▾</span>
                   </div>

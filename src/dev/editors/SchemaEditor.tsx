@@ -87,12 +87,12 @@ function MetaModal({ initial, onConfirm, onCancel, confirmLabel }: {
     <div className="dm-modal-backdrop" onClick={onCancel}>
       <div className="dm-modal" onClick={e => e.stopPropagation()}>
         <div className="dm-field">
-          <label className="dm-field-label">Nome</label>
+          <label className="dm-field-label">Nome do campo</label>
           <input
             className="dm-field-input"
             value={name}
             onChange={e => handleNameChange(e.target.value)}
-            placeholder="Metadado 01"
+            placeholder="Ex.: Material"
             autoFocus
           />
         </div>
@@ -103,12 +103,12 @@ function MetaModal({ initial, onConfirm, onCancel, confirmLabel }: {
             className="dm-field-input"
             value={id}
             onChange={e => handleIdChange(e.target.value)}
-            placeholder="metadado_01"
+            placeholder="material"
           />
         </div>
 
         <div className="dm-field">
-          <label className="dm-field-label">Tipo</label>
+          <label className="dm-field-label">Tipo de valor</label>
           <div className="dm-select-wrapper">
             <select
               className="dm-field-input dm-select-input"
@@ -187,12 +187,13 @@ export default function SchemaEditor() {
 
       <div className="dm-schema-top-bar">
         <button className="dm-schema-add-btn" onClick={() => setModal({ kind: 'add' })}>
-          + Adicionar Metadado
+          + Adicionar campo
         </button>
       </div>
 
       <div className="dm-meta-section">
-        <p className="dm-meta-section-title">Metadados padrão</p>
+        <p className="dm-meta-section-title">Campos padrão</p>
+        <p className="dm-meta-section-sub">Presentes em todo modelo, não podem ser alterados</p>
         <hr className="dm-meta-hr" />
         <div className="dm-meta-list">
           {DEFAULT_FIELDS.map(f => (
@@ -200,13 +201,14 @@ export default function SchemaEditor() {
           ))}
         </div>
 
-        <p className="dm-meta-section-title">Metadados customizados</p>
+        <p className="dm-meta-section-title">Campos personalizados</p>
+        <p className="dm-meta-section-sub">Ficam disponíveis para preenchimento na aba Modelos</p>
         <hr className="dm-meta-hr" />
 
         {!hasCustom ? (
           <div className="dm-meta-empty">
-            <p className="dm-meta-empty-title">Nenhum metadado cadastrado</p>
-            <p className="dm-meta-empty-sub">Cadastre clicando em "adicionar metadado"</p>
+            <p className="dm-meta-empty-title">Nenhum campo personalizado</p>
+            <p className="dm-meta-empty-sub">Crie um clicando em "Adicionar campo"</p>
           </div>
         ) : (
           <div className="dm-meta-list">
