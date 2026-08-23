@@ -16,6 +16,51 @@ const TYPE_LABELS: Record<string, string> = {
   link: 'Link', array: 'Lista', boolean: 'Sim/Não',
 };
 
+// Aceita AAAA, AAAA-MM, AAAA-MM-DD ou DD/MM/AAAA — o acervo usa datas parciais
+const DATE_RE = /^(\d{4}(-\d{2}(-\d{2})?)?|\d{2}\/\d{2}\/\d{4})$/;
+
+function validateValue(type: string, value: unknown): string | null {
+  switch (type) {
+    case 'number':
+      if (value === '' || value === null || value === undefined) return 'Informe um número';
+      return Number.isFinite(Number(value)) ? null : 'Informe um número válido';
+
+    case 'date': {
+      const v = String(value ?? '').trim();
+      if (!v) return 'Informe uma data';
+      return DATE_RE.test(v) ? null : 'Use AAAA, AAAA-MM-DD ou DD/MM/AAAA';
+    }
+
+    case 'link': {
+      const url = typeof value === 'string'
+        ? value.trim()
+        : String((value as Record<string, unknown>)?.link ?? '').trim();
+      if (!url) return 'Informe a URL';
+      try {
+        const { protocol } = new URL(url);
+        if (protocol !== 'http:' && protocol !== 'https:') return 'Use uma URL http:// ou https://';
+      } catch {
+        return 'URL inválida (ex.: https://exemplo.com)';
+      }
+      return null;
+    }
+
+    case 'array':
+      return Array.isArray(value) && value.length > 0 ? null : 'Adicione ao menos um valor';
+
+    case 'boolean':
+      return typeof value === 'boolean' ? null : 'Selecione Sim ou Não';
+
+    default:
+      return String(value ?? '').trim() ? null : 'Preencha ou remova este campo';
+  }
+}
+
+function fieldTypeOf(schema: SchemaEntry[] | null, key: string): string {
+  const entry = schema?.find(s => Object.keys(s)[0] === key);
+  return entry ? Object.values(entry)[0].type : 'string';
+}
+
 function slugify(filename: string) {
   return filename
     .replace(/\.glb$/i, '')
@@ -80,9 +125,10 @@ function ModelCard({ item, onEdit, onDelete }: {
   );
 }
 
-function CustomDataField({ cd, index, schema, onChange, onRemove }: {
+function CustomDataField({ cd, index, schema, error, onChange, onRemove }: {
   cd: CustomData; index: number;
   schema: SchemaEntry[] | null;
+  error: string | null;
   onChange: (i: number, key: string, val: unknown) => void;
   onRemove: (i: number) => void;
 }) {
@@ -92,11 +138,30 @@ function CustomDataField({ cd, index, schema, onChange, onRemove }: {
   const field = schemaEntry ? Object.values(schemaEntry)[0] : null;
   const fieldType = field?.type || 'string';
 
+  const inputClass = `dm-field-input${error ? ' dm-field-input-error' : ''}`;
+
   const renderInput = () => {
+    if (fieldType === 'boolean') {
+      return (
+        <div className="dm-select-wrapper">
+          <select
+            className={`${inputClass} dm-select-input`}
+            value={value === true ? 'true' : value === false ? 'false' : ''}
+            onChange={e => onChange(index, key, e.target.value === 'true')}
+          >
+            <option value="" disabled>Selecione</option>
+            <option value="true">Sim</option>
+            <option value="false">Não</option>
+          </select>
+          <span className="dm-select-arrow">▾</span>
+        </div>
+      );
+    }
+
     if (fieldType === 'array' && Array.isArray(value)) {
       return (
         <input
-          className="dm-field-input"
+          className={inputClass}
           value={(value as string[]).join(', ')}
           onChange={e => onChange(index, key, e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
           placeholder="Valores separados por vírgula"
@@ -110,13 +175,13 @@ function CustomDataField({ cd, index, schema, onChange, onRemove }: {
         <div className="dm-model-link-row">
           <input
             className="dm-field-input"
-            placeholder="Nome"
+            placeholder="Rótulo (ex.: Sketchfab)"
             value={String(linkObj.nome || '')}
             onChange={e => onChange(index, key, { ...linkObj, nome: e.target.value })}
           />
           <input
-            className="dm-field-input"
-            placeholder="URL"
+            className={inputClass}
+            placeholder="https://exemplo.com"
             value={String(linkObj.link || '')}
             onChange={e => onChange(index, key, { ...linkObj, link: e.target.value })}
           />
@@ -127,17 +192,28 @@ function CustomDataField({ cd, index, schema, onChange, onRemove }: {
     if (fieldType === 'number') {
       return (
         <input
-          className="dm-field-input"
+          className={inputClass}
           type="number"
-          value={String(value)}
-          onChange={e => onChange(index, key, Number(e.target.value))}
+          value={value === '' || value === null || value === undefined ? '' : String(value)}
+          onChange={e => onChange(index, key, e.target.value === '' ? '' : Number(e.target.value))}
+        />
+      );
+    }
+
+    if (fieldType === 'date') {
+      return (
+        <input
+          className={inputClass}
+          value={String(value ?? '')}
+          placeholder="AAAA-MM-DD"
+          onChange={e => onChange(index, key, e.target.value)}
         />
       );
     }
 
     return (
       <input
-        className="dm-field-input"
+        className={inputClass}
         value={String(value)}
         onChange={e => onChange(index, key, e.target.value)}
       />
@@ -158,6 +234,7 @@ function CustomDataField({ cd, index, schema, onChange, onRemove }: {
         >✕</button>
       </div>
       {renderInput()}
+      {error && <span className="dm-field-error">{error}</span>}
     </div>
   );
 }
@@ -355,6 +432,16 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
     onChange({ ...state, customData: customData.filter((_, idx) => idx !== i) });
   };
 
+  const nomeError = form.nome.trim() ? null : 'Informe o nome do modelo';
+
+  const customErrors = customData.map(cd => {
+    const key = Object.keys(cd)[0];
+    return validateValue(fieldTypeOf(schema, key), cd[key]);
+  });
+
+  const invalidCount = customErrors.filter(Boolean).length;
+  const canSave = !uploading && !!form.link.trim() && !nomeError && invalidCount === 0;
+
   const availableFields = schema
     ? schema
         .map(s => {
@@ -382,12 +469,13 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
             <div className="dm-field">
               <label className="dm-field-label">Nome</label>
               <input
-                className="dm-field-input"
+                className={`dm-field-input${nomeError ? ' dm-field-input-error' : ''}`}
                 value={form.nome}
                 onChange={e => setForm({ nome: e.target.value })}
                 placeholder="Nome do modelo"
                 autoFocus
               />
+              {nomeError && <span className="dm-field-error">{nomeError}</span>}
             </div>
 
             <div className="dm-model-row-2">
@@ -509,6 +597,7 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
                   cd={cd}
                   index={i}
                   schema={schema}
+                  error={customErrors[i]}
                   onChange={updateCustom}
                   onRemove={removeCustom}
                 />
@@ -516,11 +605,19 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
             </div>
           )}
 
+          {invalidCount > 0 && (
+            <p className="dm-modal-hint">
+              {invalidCount === 1
+                ? 'Corrija o metadado destacado para salvar'
+                : `Corrija os ${invalidCount} metadados destacados para salvar`}
+            </p>
+          )}
+
           <div className="dm-modal-actions">
             <button className="dm-modal-cancel" onClick={onCancel}>Cancelar</button>
             <button
               className="dm-modal-confirm"
-              disabled={uploading || !form.link.trim()}
+              disabled={!canSave}
               onClick={onSave}
             >
               {uploading ? 'Enviando...' : mode === 'add' ? 'Adicionar' : 'Salvar'}

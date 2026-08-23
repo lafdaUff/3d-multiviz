@@ -16,6 +16,16 @@ const TYPE_LABELS: Record<string, string> = {
   link: 'Link', array: 'Lista', boolean: 'Sim/Não',
 };
 
+// Regra que o valor deste campo terá de cumprir na aba Modelos
+const TYPE_HINTS: Record<string, string> = {
+  string: 'Aceita qualquer texto',
+  number: 'Aceita apenas números',
+  date: 'Aceita AAAA, AAAA-MM-DD ou DD/MM/AAAA',
+  link: 'Exige uma URL http:// ou https://',
+  array: 'Aceita vários valores separados por vírgula',
+  boolean: 'Aceita apenas Sim ou Não',
+};
+
 const DEFAULT_FIELDS = [
   { id: 'nome',      name: 'Nome',      description: 'Nome da obra ou modelo',      type: 'string' },
   { id: 'link',      name: 'Link',      description: 'Slug/URL único do modelo',    type: 'string' },
@@ -62,8 +72,9 @@ function MetaCard({ name, description, id, type, onEdit, onDelete }: {
   );
 }
 
-function MetaModal({ initial, onConfirm, onCancel, confirmLabel }: {
+function MetaModal({ initial, existingIds, onConfirm, onCancel, confirmLabel }: {
   initial: { name: string; id: string; type: string; idLocked?: boolean };
+  existingIds: string[];
   onConfirm: (values: { name: string; id: string; type: string }) => void;
   onCancel: () => void;
   confirmLabel: string;
@@ -83,28 +94,53 @@ function MetaModal({ initial, onConfirm, onCancel, confirmLabel }: {
     setIdEdited(true);
   };
 
+  const idLocked = initial.idLocked ?? false;
+  const trimmedId = id.trim();
+
+  const nameError = name.trim() ? null : 'Informe o nome do campo';
+
+  const idError = idLocked
+    ? null
+    : !trimmedId
+      ? 'Informe o ID'
+      : !/^[a-z][a-z0-9_]*$/.test(trimmedId)
+        ? 'Use apenas letras minúsculas, números e _ (comece por uma letra)'
+        : existingIds.includes(trimmedId)
+          ? 'Já existe um campo com este ID'
+          : null;
+
+  const typeError = TYPES.includes(type) ? null : 'Selecione um tipo válido';
+  const isValid = !nameError && !idError && !typeError;
+
   return (
     <div className="dm-modal-backdrop" onClick={onCancel}>
       <div className="dm-modal" onClick={e => e.stopPropagation()}>
         <div className="dm-field">
           <label className="dm-field-label">Nome do campo</label>
           <input
-            className="dm-field-input"
+            className={`dm-field-input${nameError ? ' dm-field-input-error' : ''}`}
             value={name}
             onChange={e => handleNameChange(e.target.value)}
             placeholder="Ex.: Material"
             autoFocus
           />
+          {nameError && <span className="dm-field-error">{nameError}</span>}
         </div>
 
         <div className="dm-field">
-          <label className="dm-field-label">ID <span className="dm-field-label-hint">*Gerado automaticamente</span></label>
+          <label className="dm-field-label">
+            ID <span className="dm-field-label-hint">
+              {idLocked ? '*Não pode ser alterado' : '*Gerado automaticamente'}
+            </span>
+          </label>
           <input
-            className="dm-field-input"
+            className={`dm-field-input${idLocked ? ' dm-field-input-disabled' : ''}${idError ? ' dm-field-input-error' : ''}`}
             value={id}
             onChange={e => handleIdChange(e.target.value)}
             placeholder="material"
+            readOnly={idLocked}
           />
+          {idError && <span className="dm-field-error">{idError}</span>}
         </div>
 
         <div className="dm-field">
@@ -121,13 +157,15 @@ function MetaModal({ initial, onConfirm, onCancel, confirmLabel }: {
             </select>
             <span className="dm-select-arrow">▾</span>
           </div>
+          <span className="dm-field-help">{TYPE_HINTS[type]}</span>
         </div>
 
         <div className="dm-modal-actions">
           <button className="dm-modal-cancel" onClick={onCancel}>Cancelar</button>
           <button
             className="dm-modal-confirm"
-            onClick={() => { if (id.trim()) onConfirm({ name, id: id.trim(), type }); }}
+            disabled={!isValid}
+            onClick={() => { if (isValid) onConfirm({ name, id: trimmedId, type }); }}
           >
             {confirmLabel}
           </button>
@@ -157,7 +195,7 @@ export default function SchemaEditor() {
     setModal(null);
   };
 
-  const handleEditSave = (index: number, { name, id, type }: { name: string; id: string; type: string }) => {
+  const handleEditSave = (index: number, { name, type }: { name: string; id: string; type: string }) => {
     const entry = (data || [])[index];
     const key = Object.keys(entry)[0];
     const prev = entry[key];
@@ -171,6 +209,8 @@ export default function SchemaEditor() {
     save((data || []).filter((_, i) => i !== index));
 
   const hasCustom = data && data.length > 0;
+
+  const allIds = (data || []).map(entry => Object.keys(entry)[0]);
 
   const editInitial = (() => {
     if (modal?.kind !== 'edit') return null;
@@ -234,6 +274,7 @@ export default function SchemaEditor() {
       {modal?.kind === 'add' && (
         <MetaModal
           initial={{ name: '', id: '', type: 'string' }}
+          existingIds={allIds}
           onConfirm={handleAdd}
           onCancel={() => setModal(null)}
           confirmLabel="Adicionar"
@@ -243,6 +284,7 @@ export default function SchemaEditor() {
       {modal?.kind === 'edit' && editInitial && (
         <MetaModal
           initial={editInitial}
+          existingIds={allIds.filter((_, i) => i !== modal.index)}
           onConfirm={v => handleEditSave(modal.index, v)}
           onCancel={() => setModal(null)}
           confirmLabel="Salvar"
