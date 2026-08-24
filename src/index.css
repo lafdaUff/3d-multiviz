@@ -14,6 +14,7 @@
   --bg-color: #0C0C0C;
   --text-color: #fff;
   --secondary-color: #1C1C1C;
+  --selected-color: green;
   --renderer-color-1: #2b2b2b;
   --renderer-color-2: #1c1c1c;
 }
@@ -549,7 +550,7 @@ ul::-webkit-scrollbar {
 }
 
 .objetos .selected{
-  border: 1px green solid;
+  border: 1px var(--selected-color) solid;
   color: var(--text-color);
 }
 
@@ -677,7 +678,7 @@ ul::-webkit-scrollbar {
   opacity: 0.7;
 }
 .searchBar .filter-toggle.active{
-  color: #9ece6a;
+  color: var(--selected-color);
 }
 .filter-toggle-count{
   position: absolute;
@@ -686,8 +687,8 @@ ul::-webkit-scrollbar {
   min-width: 15px;
   padding: 1px 4px;
   border-radius: 20px;
-  background-color: #9ece6a;
-  color: var(--bg-color);
+  background-color: var(--selected-color);
+  color: var(--text-color);
   font-size: 10px;
   font-weight: 600;
   line-height: 1.3;
