@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useDataFile } from '../useDataManager';
+import { TYPES, TYPE_HINTS } from '../fieldTypes';
+import TypeBadge from '../TypeBadge';
 
 interface SchemaField {
   type: string;
@@ -10,24 +12,8 @@ interface SchemaField {
 
 type SchemaEntry = Record<string, SchemaField>;
 
-const TYPES = ['string', 'number', 'date', 'link', 'array', 'boolean'];
-const TYPE_LABELS: Record<string, string> = {
-  string: 'Texto', number: 'Número', date: 'Data',
-  link: 'Link', array: 'Lista', boolean: 'Sim/Não',
-};
-
-// Regra que o valor deste campo terá de cumprir na aba Modelos
-const TYPE_HINTS: Record<string, string> = {
-  string: 'Aceita qualquer texto',
-  number: 'Aceita apenas números',
-  date: 'Aceita AAAA, AAAA-MM-DD ou DD/MM/AAAA',
-  link: 'Exige uma URL http:// ou https://',
-  array: 'Aceita vários valores separados por vírgula',
-  boolean: 'Aceita apenas Sim ou Não',
-};
-
 const DEFAULT_FIELDS = [
-  { id: 'nome',      name: 'Nome',      description: 'Nome da obra ou modelo',      type: 'string' },
+  { id: 'nome',      name: 'Título',    description: 'Título da obra ou modelo',    type: 'string' },
   { id: 'link',      name: 'Link',      description: 'Slug/URL único do modelo',    type: 'string' },
   { id: 'thumb',     name: 'Thumbnail', description: 'URL da imagem de capa',       type: 'string' },
   { id: 'descricao', name: 'Descrição', description: 'Descrição detalhada da obra', type: 'string' },
@@ -57,7 +43,7 @@ function MetaCard({ name, description, id, type, onEdit, onDelete }: {
       <div className="dm-meta-divider" />
       <div className="dm-meta-col">
         <span className="dm-meta-col-label">Tipo</span>
-        <span className="dm-meta-col-value">{TYPE_LABELS[type] || type}</span>
+        <TypeBadge type={type} />
       </div>
       {onEdit && (
         <>
@@ -144,18 +130,22 @@ function MetaModal({ initial, existingIds, onConfirm, onCancel, confirmLabel }: 
         </div>
 
         <div className="dm-field">
-          <label className="dm-field-label">Tipo de valor</label>
-          <div className="dm-select-wrapper">
-            <select
-              className="dm-field-input dm-select-input"
-              value={type}
-              onChange={e => setType(e.target.value)}
-            >
-              {TYPES.map(t => (
-                <option key={t} value={t}>{TYPE_LABELS[t] || t}</option>
-              ))}
-            </select>
-            <span className="dm-select-arrow">▾</span>
+          <div className="dm-type-field-header">
+            <label className="dm-field-label">Tipo de valor</label>
+            <TypeBadge type={type} />
+          </div>
+          <div className="dm-type-options">
+            {TYPES.map(t => (
+              <button
+                key={t}
+                type="button"
+                className={`dm-type-option${type === t ? ' active' : ''}`}
+                data-type={t}
+                onClick={() => setType(t)}
+              >
+                <TypeBadge type={t} />
+              </button>
+            ))}
           </div>
           <span className="dm-field-help">{TYPE_HINTS[type]}</span>
         </div>

@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useDataFile } from '../useDataManager';
 import { generateThumbnail, extractDimensions } from '../generateThumbnail';
 import type { ModelData, CustomData } from '../../data/schema';
+import TypeBadge from '../TypeBadge';
 
 interface SchemaField {
   type: string;
@@ -10,11 +11,6 @@ interface SchemaField {
   items?: { type: string };
 }
 type SchemaEntry = Record<string, SchemaField>;
-
-const TYPE_LABELS: Record<string, string> = {
-  string: 'Texto', number: 'Número', date: 'Data',
-  link: 'Link', array: 'Lista', boolean: 'Sim/Não',
-};
 
 // Aceita AAAA, AAAA-MM, AAAA-MM-DD ou DD/MM/AAAA — o acervo usa datas parciais
 const DATE_RE = /^(\d{4}(-\d{2}(-\d{2})?)?|\d{2}\/\d{2}\/\d{4})$/;
@@ -125,24 +121,55 @@ function ModelCard({ item, onEdit, onDelete }: {
   );
 }
 
-function ArrayValueInput({ value, className, onChange }: {
-  value: string[]; className: string; onChange: (v: string[]) => void;
+function ArrayValueInput({ value, invalid, onChange }: {
+  value: string[]; invalid: boolean; onChange: (v: string[]) => void;
 }) {
-  // guarda o texto digitado (com vírgulas e espaços) enquanto o valor salvo é a lista já separada
-  const [raw, setRaw] = useState(() => value.join(', '));
+  // cada valor vira uma tag; o input só guarda o item que está sendo digitado
+  const [draft, setDraft] = useState('');
 
-  const handleChange = (text: string) => {
-    setRaw(text);
-    onChange(text.split(',').map(s => s.trim()).filter(Boolean));
+  const commit = (text: string) => {
+    const parts = text.split(',').map(s => s.trim()).filter(Boolean);
+    setDraft('');
+    if (!parts.length) return;
+    const merged = [...value];
+    for (const part of parts) {
+      if (!merged.some(v => v.toLowerCase() === part.toLowerCase())) merged.push(part);
+    }
+    if (merged.length !== value.length) onChange(merged);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      commit(draft);
+    } else if (e.key === 'Backspace' && !draft && value.length > 0) {
+      onChange(value.slice(0, -1));
+    }
   };
 
   return (
-    <input
-      className={className}
-      value={raw}
-      onChange={e => handleChange(e.target.value)}
-      placeholder="Valores separados por vírgula"
-    />
+    <div className={`dm-array-input${invalid ? ' dm-field-input-error' : ''}`}>
+      {value.map((v, i) => (
+        <span className="dm-chip" key={`${v}-${i}`}>
+          {v}
+          <button
+            type="button"
+            className="dm-chip-remove"
+            title={`Remover ${v}`}
+            onClick={() => onChange(value.filter((_, idx) => idx !== i))}
+          >✕</button>
+        </span>
+      ))}
+      <input
+        className="dm-array-input-field"
+        value={draft}
+        // colar "a, b, c" já entra como vários itens
+        onChange={e => (e.target.value.includes(',') ? commit(e.target.value) : setDraft(e.target.value))}
+        onKeyDown={handleKeyDown}
+        onBlur={() => commit(draft)}
+        placeholder={value.length ? 'Adicionar outro…' : 'Digite e pressione Enter'}
+      />
+    </div>
   );
 }
 
@@ -182,8 +209,8 @@ function CustomDataField({ cd, index, schema, error, onChange, onRemove }: {
     if (fieldType === 'array' && Array.isArray(value)) {
       return (
         <ArrayValueInput
-          className={inputClass}
           value={value as string[]}
+          invalid={!!error}
           onChange={v => onChange(index, key, v)}
         />
       );
@@ -245,7 +272,7 @@ function CustomDataField({ cd, index, schema, error, onChange, onRemove }: {
       <div className="dm-model-custom-row-header">
         <span className="dm-model-custom-label">
           {field?.name || key}
-          <span className="dm-field-label-hint">{TYPE_LABELS[fieldType] || fieldType}</span>
+          <TypeBadge type={fieldType} />
         </span>
         <button
           className="dm-meta-action-btn dm-meta-action-danger"
@@ -452,7 +479,7 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
     onChange({ ...state, customData: customData.filter((_, idx) => idx !== i) });
   };
 
-  const nomeError = form.nome.trim() ? null : 'Informe o nome do modelo';
+  const nomeError = form.nome.trim() ? null : 'Informe o título da obra';
 
   const customErrors = customData.map(cd => {
     const key = Object.keys(cd)[0];
@@ -487,12 +514,12 @@ function ModelModal({ state, schema, onSave, onCancel, onChange }: {
 
           <div className="dm-model-modal-fields">
             <div className="dm-field">
-              <label className="dm-field-label">Nome</label>
+              <label className="dm-field-label">Título</label>
               <input
                 className={`dm-field-input${nomeError ? ' dm-field-input-error' : ''}`}
                 value={form.nome}
                 onChange={e => setForm({ nome: e.target.value })}
-                placeholder="Nome do modelo"
+                placeholder="Título da obra"
                 autoFocus
               />
               {nomeError && <span className="dm-field-error">{nomeError}</span>}

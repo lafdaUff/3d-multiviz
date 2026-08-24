@@ -2,7 +2,8 @@
     {
         "Data de criação":{
             "type": "date",
-            "description": "The date when the object was created."
+            "name": "Data de fabricação",
+            "description": "Data em que o objeto foi fabricado (não confundir com a data de cadastro no acervo)."
         }
     },
     {
@@ -14,7 +15,8 @@
     {
         "País": {
             "type": "string",
-            "description": "The country of origin of the object."
+            "name": "Origem",
+            "description": "País/cidade de origem do objeto."
         }
     },
     {

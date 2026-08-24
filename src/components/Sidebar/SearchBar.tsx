@@ -1,21 +1,16 @@
-import { type ModelData } from "../viewport/Experience"
-import searchInItems from "./search"
-import database from '../../data/database.json' with { type: 'json' }
-import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
-export default function SearchBar({ onSearch }: { onSearch: (items: ModelData[]) => void }) {
+interface SearchBarProps {
+    value: string
+    onChange: (value: string) => void
+    onToggleFilters: () => void
+    filtersOpen: boolean
+    activeFilters: number
+}
+
+export default function SearchBar({ value, onChange, onToggleFilters, filtersOpen, activeFilters }: SearchBarProps) {
 
     const { t } = useTranslation();
-
-    function handleSearch(searchTerm: string) {
-        const getSearch = searchInItems(database, searchTerm)
-        onSearch(getSearch)
-    }
-
-    useEffect(() => {
-        onSearch(database) 
-    }, [])
 
     return(
         <div className="searchBar flex">
@@ -24,9 +19,22 @@ export default function SearchBar({ onSearch }: { onSearch: (items: ModelData[])
                 id="searchField"
                 placeholder={t("search.placeholder")}
                 className="search"
-                onChange={(e) => handleSearch(e.target.value)}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
             />
-            <p id="searchBTN"><i className="fa-solid fa-magnifying-glass"></i></p>
-            </div>
+            {value !== "" && (
+                <button className="search-icon-btn" title={t("search.clear")} onClick={() => onChange("")}>
+                    <i className="fa-solid fa-xmark"></i>
+                </button>
+            )}
+            <button
+                className={`search-icon-btn filter-toggle${filtersOpen || activeFilters > 0 ? " active" : ""}`}
+                title={t("filters.open")}
+                onClick={onToggleFilters}
+            >
+                <i className="fa-solid fa-sliders"></i>
+                {activeFilters > 0 && <span className="filter-toggle-count">{activeFilters}</span>}
+            </button>
+        </div>
     )
 }

@@ -42,7 +42,27 @@ i18n
             "step4": {"label": "Position", "description": "Click on the object and drag to reposition it"}
           },
           "viewport": {"resetView": "Reset view", "hoverTip": "View metadata"},
-          "search": {"placeholder": "Search"}
+          "search": {
+            "placeholder": "Search",
+            "clear": "Clear search",
+            "results_one": "{{count}} model",
+            "results_other": "{{count}} models"
+          },
+          "filters": {
+            "title": "Filters",
+            "open": "Filter by metadata",
+            "close": "Close filters",
+            "clear": "Clear filters",
+            "remove": "Remove filter",
+            "empty": "No metadata available to filter",
+            "groupBy": "Group by",
+            "noGroup": "None",
+            "noValue": "Not informed",
+            "seeSimilar": "See models with \"{{value}}\"",
+            "show_one": "Show {{count}} model",
+            "show_other": "Show {{count}} models"
+          },
+          "list": {"empty": "No items found"}
         }
       },
       pt: {
@@ -62,7 +82,27 @@ i18n
             "step4": {"label": "Posicionar", "description": "Clique no objeto e arraste para reposicioná-lo"}
           },
             "viewport": {"resetView": "Redefinir visão", "hoverTip": "Visualizar metadados"},
-            "search": {"placeholder": "Pesquisar"}
+            "search": {
+              "placeholder": "Pesquisar",
+              "clear": "Limpar busca",
+              "results_one": "{{count}} modelo",
+              "results_other": "{{count}} modelos"
+            },
+            "filters": {
+              "title": "Filtros",
+              "open": "Filtrar por metadado",
+              "close": "Fechar filtros",
+              "clear": "Limpar filtros",
+              "remove": "Remover filtro",
+              "empty": "Nenhum metadado disponível para filtrar",
+              "groupBy": "Agrupar por",
+              "noGroup": "Nenhum",
+              "noValue": "Não informado",
+              "seeSimilar": "Ver modelos com \"{{value}}\"",
+              "show_one": "Ver {{count}} modelo",
+              "show_other": "Ver {{count}} modelos"
+            },
+            "list": {"empty": "Nenhum item encontrado"}
         }
       }
     },

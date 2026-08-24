@@ -1,12 +1,16 @@
 
 import Item from './Item'
 import {  useContext, useState, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import ObjectsContext from '../../ObjectsContext'
 import { type ModelData } from '../viewport/Experience'
+import { type ItemGroup } from '../../data/catalog'
 import Tooltip from './Tooltip'
 import { type TooltipProps } from './Tooltip'
 
-export default function ItemList({list} : {list: ModelData[]}){
+export default function ItemList({groups} : {groups: ItemGroup[]}){
+
+    const { t } = useTranslation()
 
     const { currentObjects, setCurrentObjects } = useContext(ObjectsContext)
 
@@ -14,8 +18,11 @@ export default function ItemList({list} : {list: ModelData[]}){
 
     const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map())
     const listaRef = useRef<HTMLDivElement>(null)
-    
+
     const isMobile = window.innerWidth <= 768
+
+    const grouped = groups.some(group => group.label !== null)
+    const total = groups.reduce((sum, group) => sum + group.items.length, 0)
 
     function handleItemClick(item: ModelData) {
         setCurrentObjects((prevSelected) => {
@@ -30,7 +37,7 @@ export default function ItemList({list} : {list: ModelData[]}){
         if (el) {
             el.scrollIntoView({
             behavior: "smooth",
-            inline: "center", 
+            inline: "center",
             block: "nearest",
             });
         }
@@ -50,26 +57,35 @@ export default function ItemList({list} : {list: ModelData[]}){
 
     return(
         <>
-            <div className="lista" ref={listaRef}>
+            <div className={`lista${grouped ? ' grouped' : ''}`} ref={listaRef}>
                 <div className="gradient"></div>
-                <ul id="objetos" className="objetos">
-                    { list.length > 0 ? list.map(item => (
-                        <Item
-                        ref={(el: HTMLLIElement | null) => {
-                        if (el) itemRefs.current.set(item.link, el);
-                        }}
-                        selected={currentObjects.includes(item)}
-                        item={{image: item.thumb}}
-                        key={item.link}
-                        onMouseEnter={(event) => handleItemEnter(event, item)}
-                        onMouseLeave={() => setTooltipContent(undefined)}
-                        onClick = {() => handleItemClick(item)}/>
-                        
-                    )) : <p>Nenhum item encontrado</p>}
-                </ul>
+                { total === 0 ? <p>{t("list.empty")}</p> : groups.map(group => (
+                    <div className="lista-group" key={group.key}>
+                        {group.label !== null && (
+                            <p className="lista-group-title">
+                                <span>{group.label || t("filters.noValue")}</span>
+                                <span className="lista-group-count">{group.items.length}</span>
+                            </p>
+                        )}
+                        <ul className="objetos">
+                            {group.items.map(item => (
+                                <Item
+                                ref={(el: HTMLLIElement | null) => {
+                                if (el) itemRefs.current.set(item.link, el);
+                                }}
+                                selected={currentObjects.includes(item)}
+                                item={{image: item.thumb}}
+                                key={item.link}
+                                onMouseEnter={(event) => handleItemEnter(event, item)}
+                                onMouseLeave={() => setTooltipContent(undefined)}
+                                onClick = {() => handleItemClick(item)}/>
+                            ))}
+                        </ul>
+                    </div>
+                )) }
             </div>
             {tooltipContent && <Tooltip {...tooltipContent}/>}
         </>
-        
+
     )
 }
